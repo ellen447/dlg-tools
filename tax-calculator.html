@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cook County — Tax Credit Calculator</title>
+<style>
+:root{color-scheme:light;--blue:#2563eb;--blue-dk:#1d4ed8;--blue-lt:#eff6ff;--blue-bd:#bfdbfe;--red:#dc2626;--red-lt:#fef2f2;--red-bd:#fecaca;--green:#16a34a;--purple:#7c3aed;--purple-lt:#faf5ff;--purple-bd:#ddd6fe;--amber:#d97706;--amber-lt:#fffbeb;--amber-bd:#fcd34d;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;background:#f1f5f9;color:var(--g900);font-size:14px;min-height:100vh}
+#sv{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem}
+.sl h1{font-size:1.75rem;font-weight:300;color:var(--g600);text-align:center}
+.sl h1 strong{font-weight:700;color:var(--g800)}
+.sl p{text-align:center;color:var(--g400);font-size:.8rem;margin-top:.3rem}
+.sc{width:100%;max-width:500px;background:#fff;border:1px solid var(--g200);border-radius:14px;padding:1.75rem;margin-top:1.5rem;box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.ptog{display:flex;background:var(--g100);border-radius:8px;padding:3px;margin-bottom:1rem}
+.ptog button{flex:1;padding:.45rem;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:.825rem;font-weight:500;color:var(--g500);transition:all .15s}
+.ptog button.on{background:#fff;color:var(--g900);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.si{width:100%;padding:.75rem 1rem;border:1.5px solid var(--g200);border-radius:8px;font-size:.95rem;outline:none;margin-bottom:1rem;transition:border-color .15s}
+.si:focus{border-color:var(--blue)}
+.bb{width:100%;padding:.875rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .15s}
+.bb:hover{background:var(--blue-dk)}
+.bb:active{transform:scale(.98)}
+.bb:disabled{background:var(--g400);cursor:not-allowed;transform:none}
+#cv{display:none;max-width:980px;margin:0 auto;padding:1.5rem 1rem 5rem}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem}
+.ph h1{font-size:1.35rem;font-weight:300;color:var(--g600)}
+.ph h1 strong{font-weight:700;color:var(--g800)}
+.ph p{font-size:.75rem;color:var(--g400);margin-top:.2rem}
+.back{padding:.4rem .85rem;border:1px solid var(--g300);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;color:var(--g500)}
+.back:hover{background:var(--g50)}
+.alert-sold{display:none;background:var(--amber-lt);border:1px solid var(--amber-bd);border-left:4px solid var(--amber);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.825rem;line-height:1.6}
+.alert-sold.show{display:block}
+.alert-sold strong{color:#92400e}
+.alert-sold a{color:var(--blue)}
+.card{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:1.375rem 1.5rem;margin-bottom:1.25rem}
+.ch{display:flex;align-items:center;gap:.75rem;padding-bottom:.875rem;margin-bottom:1.125rem;border-bottom:1px solid var(--g200)}
+.ct{font-size:.64rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--blue)}
+.cs{font-size:.64rem;font-weight:600;color:var(--g400);letter-spacing:.05em}
+.cb{font-size:.64rem;font-weight:700;letter-spacing:.05em;padding:.2rem .5rem;border-radius:4px;margin-left:auto}
+.cb.green{background:#dcfce7;color:#166534}
+.cb.amber{background:var(--amber-lt);color:#92400e}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+.ga{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem}
+.f{display:flex;flex-direction:column;gap:.35rem}
+.f label{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500)}
+.f input,.f select{padding:.55rem .75rem;border:1px solid var(--g300);border-radius:6px;font-size:.9rem;color:var(--g800);outline:none;width:100%;background:#fff;transition:border-color .15s}
+.f input:focus,.f select:focus{border-color:var(--blue)}
+.f input[readonly]{background:var(--g50);font-weight:600}
+.f input:disabled{background:var(--g100);color:var(--g400)}
+.hint{font-size:.7rem;color:var(--g400);margin-top:.15rem}
+.bg{display:flex}
+.bg button{flex:1;padding:.52rem .6rem;border:1px solid var(--g300);border-left:none;background:#fff;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--g600);transition:all .13s;text-align:center}
+.bg button:first-child{border-left:1px solid var(--g300);border-radius:6px 0 0 6px}
+.bg button:last-child{border-radius:0 6px 6px 0}
+.bg button.on{background:var(--blue);border-color:var(--blue);color:#fff;z-index:1}
+.bg button:hover:not(.on){background:var(--g50)}
+.tt{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1rem}
+.tt th{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);padding:.45rem .75rem;text-align:left;border-bottom:1px solid var(--g200)}
+.tt td{padding:.6rem .75rem;border-bottom:1px solid var(--g100);color:var(--g700);vertical-align:middle}
+.tt tr.basis td{background:var(--g50);font-weight:700}
+.tt a{color:var(--blue);font-size:.78rem;text-decoration:none;white-space:nowrap}
+.tt a:hover{text-decoration:underline}
+.paid{color:var(--green);font-weight:700;font-size:.75rem}
+.unpaid{color:var(--red);font-weight:700;font-size:.75rem}
+.nbilled{color:var(--g400);font-size:.8rem;font-style:italic}
+.exbox{background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:.75rem 1rem;font-size:.82rem;color:var(--g600);margin-top:.75rem;line-height:1.6}
+.ex-row{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0}
+.ex-name{color:var(--g700)}
+.ex-amt{font-weight:600;color:var(--g800)}
+.ex-addback{font-size:.72rem;color:var(--amber);font-weight:600;margin-left:.5rem}
+.sp{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin:.875rem 0}
+.sb{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:.875rem 1rem}
+.sl2{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);margin-bottom:.35rem}
+.sv2{font-size:1.2rem;font-weight:700;color:var(--g800)}
+.sn{font-size:.7rem;color:var(--g400);margin-top:.25rem}
+.eb{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;background:var(--blue-lt);border:1.5px solid var(--blue-bd);border-radius:8px;padding:.875rem 1.125rem;margin-top:.875rem}
+.el{font-size:.85rem;color:var(--blue);font-weight:500}
+.ev{font-size:1.2rem;font-weight:800;color:var(--blue)}
+.ssl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin:1rem 0 .5rem}
+.si2{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border:1px solid var(--g200);border-radius:8px;padding:.875rem 1.125rem;margin-bottom:.5rem}
+.si2.credit{border-color:var(--purple-bd);background:var(--purple-lt)}
+.si2.county{border-color:var(--red-bd);background:var(--red-lt)}
+.sil h4{font-size:.875rem;font-weight:600;color:var(--g800);margin-bottom:.2rem}
+.sil p{font-size:.72rem;color:var(--g400)}
+.sia{text-align:right;flex-shrink:0}
+.sd{display:block;font-size:1.15rem;font-weight:800}
+.sd.purple{color:var(--purple)}
+.sd.red{color:var(--red)}
+.sdt{display:block;font-size:.68rem;color:var(--g400);margin-top:.15rem}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
+.dc{background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:.75rem 1rem}
+.dcl{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);margin-bottom:.25rem}
+.dcv{font-size:1rem;font-weight:700;color:var(--g800)}
+.fb{background:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:.875rem 1rem;font-family:\'Menlo\',\'Courier New\',monospace;font-size:.78rem;color:#713f12;line-height:1.8;margin-bottom:.875rem;white-space:pre-wrap}
+.sumbar{border-left:4px solid var(--blue);background:var(--g50);border-radius:0 6px 6px 0;padding:.875rem 1rem;font-size:.78rem;color:var(--g600);line-height:1.8;margin-bottom:1rem}
+.sumbar strong{color:var(--g800)}
+.totrow{display:flex;justify-content:space-between;font-size:.78rem;color:var(--g500);flex-wrap:wrap;gap:.5rem}
+.totrow strong{color:var(--g800)}
+.ph-box{text-align:center;padding:2rem;color:var(--g400);font-size:.875rem;border:1px dashed var(--g200);border-radius:8px}
+@media(max-width:600px){.g2,.g3,.dg,.sp{grid-template-columns:1fr}.ga{grid-template-columns:1fr 1fr}}
+.print-btn{padding:.4rem .85rem;border:1px solid var(--g300);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;color:var(--g500);display:inline-flex;align-items:center;gap:.35rem}
+.print-btn:hover{background:var(--g50)}
+.print-bar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.file-link{font-size:.72rem;color:var(--blue);word-break:break-all}
+@media print{#sv{display:none!important}#cv{display:block!important;max-width:100%;padding:.5rem}.back,.print-bar{display:none!important}.card{break-inside:avoid;box-shadow:none;border:1px solid #ccc;margin-bottom:.75rem}body{background:#fff;font-size:12px}.bb,.ptog{display:none}}
+</style>
+
+
+<div id="sv">
+  <div class="sl">
+    <h1>Cook County — <strong>Tax Credit Calculator</strong></h1>
+    <p>Seller\'s closing tax obligations · Proration &amp; credit calculator</p>
+  </div>
+  <div class="sc">
+    <div class="ptog" id="ptog">
+      <button class="on" onclick="setMode(\'pin\')">PIN</button>
+      <button onclick="setMode(\'addr\')">Property Address</button>
+    </div>
+    <input id="si" class="si" type="text" placeholder="XX-XX-XXX-XXX-XXXX" onkeydown="if(event.key===\'Enter\')beep()"/>
+    <button class="bb" id="beep-btn" onclick="beep()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><ellipse cx="14" cy="13" rx="5" ry="4.5" fill="rgba(255,255,255,.85)"/><circle cx="19" cy="9.5" r="3.5" fill="rgba(255,255,255,.85)"/><polygon points="21.5,9.5 24,8.5 21.5,10.5" fill="#fbbf24"/><path d="M18.5 6Q19.5 4 20 3Q19 5 21 5Q19 6 20 7Z" fill="rgba(255,255,255,.9)"/><circle cx="20" cy="9" r=".9" fill="#1e40af"/><line x1="10" y1="17.5" x2="7.5" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="1.4" stroke-linecap="round"/><line x1="14" y1="17.5" x2="16.5" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="1.4" stroke-linecap="round"/><line x1="7.5" y1="22" x2="5" y2="21" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"/><line x1="16.5" y1="22" x2="19" y2="21" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"/><path d="M9 13Q6 11 5 9Q7 11 6 8Q8 11 7 7" stroke="rgba(255,255,255,.75)" stroke-width="1.2" fill="none" stroke-linecap="round"/><line x1="1" y1="10" x2="4" y2="10" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/><line x1="0" y1="13" x2="3" y2="13" stroke="rgba(255,255,255,.45)" stroke-width="1" stroke-linecap="round"/></svg>
+      Beep Beep!!
+    </button>
+    <div id="beep-msg" style="display:none;margin-top:.75rem;padding:.6rem .9rem;background:#fefce8;border:1px solid #fde68a;border-radius:6px;font-size:.78rem;color:#92400e;line-height:1.5"></div>
+  </div>
+  <p style="margin-top:1rem;font-size:.72rem;color:var(--g400);text-align:center">
+    Looks up live data from <a href="https://www.cookcountytreasurer.com" target="_blank" style="color:var(--blue)">cookcountytreasurer.com</a>
+  </p>
+</div>
+<div id="cv">
+  <div class="ph">
+    <div>
+      <h1>Cook County — <strong>Tax Credit Calculator</strong></h1>
+      <p id="fetch-sub">Seller\'s closing tax obligations · Data from Cook County Treasurer</p>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="print-btn" onclick="window.print()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print / Save PDF</button>
+      <button class="print-btn" id="link-btn" onclick="copyLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span id="link-btn-txt">Copy Link</span></button>
+      <button class="back" onclick="goSearch()">← New Search</button>
+    </div>
+  </div>
+  <div class="alert-sold" id="sold-alert">
+    <strong>⚠ SOLD TAX — Tax Year <span id="sold-yr">????</span>:</strong>
+    Delinquent taxes were sold to a tax buyer. Obtain current redemption amount from the
+    <a href="https://www.cookcountyclerkofcourt.org" target="_blank">Cook County Clerk of Court</a>
+    before closing. Check Circuit Court for pending tax deed petition.
+    <em>Amount not reflected in calculations below.</em>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">County Records — Treasurer</span><span class="cs" id="fetch-badge">—</span></div>
+    <div style="margin-bottom:.5rem">
+      <div style="font-size:1.05rem;font-weight:700;color:var(--g800)" id="prop-addr-display">—</div>
+      <div style="font-size:.8rem;color:var(--g500);margin-top:.2rem" id="prop-sub-display">—</div>
+    </div>
+    <div style="margin-top:1rem">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.5rem">Tax Bill History</div>
+      <table class="tt">
+        <thead><tr><th>Tax Year</th><th>1st Installment</th><th>2nd Installment</th><th>Full Year</th><th>Status</th></tr></thead>
+        <tbody id="tax-tbody"><tr><td colspan="5" style="text-align:center;color:var(--g400);padding:1rem">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.35rem">Seller\'s Exemptions on Bill</div>
+    <div class="exbox" id="ex-display">—</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Para 150-153 · Exemption Adjustment</span></div>
+    <div style="margin-bottom:1rem">
+      <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.4rem">Seller Type</div>
+      <div class="bg" style="max-width:300px">
+        <button class="on" id="btn-ind" onclick="setSeller(\'individual\')">Individual</button>
+        <button id="btn-ent" onclick="setSeller(\'entity\')">Entity (Corp/LLC/Trust)</button>
+      </div>
+      <div class="hint" style="margin-top:.35rem">Entity sellers cannot hold exemptions — pre-exemption amount is used as proration basis.</div>
+    </div>
+    <div class="sp">
+      <div class="sb"><div class="sl2">Scenario A — Billed Amount</div><div class="sv2" id="sc-a">$0.00</div><div class="sn" id="sc-a-note">Full year bill as issued</div></div>
+      <div class="sb"><div class="sl2">Scenario B — Adjusted Proration Basis</div><div class="sv2" id="sc-b">$0.00</div><div class="sn" id="sc-b-note">Scenario A + senior exemptions added back</div></div>
+    </div>
+    <div class="eb" id="escrow-banner" style="display:none"><div class="el">Escrow this difference per Contract Para 150-153</div><div class="ev" id="escrow-val">$0.00</div></div>
+    <div class="hint" style="margin-top:.625rem" id="basis-note">Proration will use Scenario A.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Closing Settings</span></div>
+    <div class="g2" style="margin-bottom:1rem">
+      <div class="f"><label>Closing Date</label><input type="date" id="f-close" oninput="calc()"/></div>
+      <div class="f">
+        <label>Closing Day Belongs To</label>
+        <div class="bg"><button class="on" id="btn-buyer" onclick="setClose(\'buyer\')">Buyer</button><button id="btn-seller" onclick="setClose(\'seller\')">Seller</button></div>
+        <span class="hint">Most Cook County contracts: buyer owns closing day</span>
+      </div>
+    </div>
+    <div class="f" style="margin-bottom:1rem">
+      <label>Proration Rate</label>
+      <div class="bg">
+        <button id="r100" onclick="setRate(100)">100%</button>
+        <button id="r105" onclick="setRate(105)">105%</button>
+        <button id="r110" class="on" onclick="setRate(110)">110%</button>
+        <button id="r115" onclick="setRate(115)">115%</button>
+        <button id="rcust" onclick="focusCust()">Custom</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>Rate (%)</label><input type="number" step=".1" id="f-rate" value="110" oninput="custRate()"/></div>
+      <div class="f">
+        <label>Day Count</label>
+        <div class="bg"><button class="on" id="d365" onclick="setDays(\'365\')">365-day</button><button id="dact" onclick="setDays(\'actual\')">Actual</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="county-card" style="display:none">
+    <div class="ch"><span class="ct">Seller Pays → County (Unpaid Billed Installments + Interest)</span></div>
+    <div id="county-rows"></div>
+    <div class="hint">Interest accrues daily — update amounts at closing. Paid to Cook County Treasurer only, not credited to buyer.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Closing Summary — Seller\'s Tax Obligations</span></div>
+    <div id="sum-ph" class="ph-box">Enter closing date above to see closing summary.</div>
+    <div id="sum-body" style="display:none">
+      <div class="ssl">Seller Pays → County</div>
+      <div id="sum-county-rows"><div class="si2 county"><div class="sil"><h4>No unpaid billed installments on file</h4><p>Confirm with County Treasurer at closing</p></div></div></div>
+      <div class="ssl" style="margin-top:1.25rem">Seller Credits → Buyer</div>
+      <div id="sum-credit-rows"></div>
+    </div>
+  </div>
+  <div class="card" id="detail-card" style="display:none">
+    <div class="ch"><span class="ct">Proration Calculation Detail</span></div>
+    <div class="dg">
+      <div class="dc"><div class="dcl">Proration Basis (<span id="d-byr">2024</span> Full Year)</div><div class="dcv" id="d-bill"></div></div>
+      <div class="dc"><div class="dcl">× Proration Rate</div><div class="dcv" id="d-rate"></div></div>
+      <div class="dc"><div class="dcl">= Prorated Annual Estimate</div><div class="dcv" id="d-annual"></div></div>
+      <div class="dc"><div class="dcl">÷ Year Days</div><div class="dcv" id="d-days"></div></div>
+      <div class="dc"><div class="dcl">= Per Diem</div><div class="dcv" id="d-diem"></div></div>
+      <div class="dc"><div class="dcl" id="d-sdays-lbl">Seller Days in Closing Year</div><div class="dcv" id="d-sdays"></div></div>
+      <div class="dc"><div class="dcl" id="d-pyr-lbl">Closing Year Proration Credit</div><div class="dcv" id="d-pcredit"></div></div>
+      <div class="dc"><div class="dcl" id="d-est25-lbl">2025 2nd Inst. (Est., Unbilled)</div><div class="dcv" id="d-est25"></div></div>
+    </div>
+    <div class="fb" id="d-formula"></div>
+    <div class="sumbar" id="d-sumbar"></div>
+    <div class="totrow"><span>Total seller pays county: <strong id="t-county">—</strong></span><span>Total buyer credits: <strong id="t-buyer">—</strong></span></div>
+  </div>
+</div>
+<script>
+const TAX_DATA = {
+  fetched: true,
+  fetchDate: "May 13, 2026",
+  property: {
+    address: "4340 MAYFAIR CT, COUNTRY CLUB HILLS, IL 60478",
+    pin: "28-34-413-020-0000",
+    owner: "DOREEN A GERMANY",
+    volume: "035",
+    isEntity: false
+  },
+  basisYear: 2024,
+  basisBeforeExemptions: 8689.66,
+  basisAfterExemptions: 6889.81,
+  exemptions: [
+    { name: "Homeowner\'s Exemption", amount: 1799.85, homeowner: true, senior: false },
+    { name: "Senior Citizen Exemption", amount: 0, homeowner: false, senior: true },
+    { name: "Senior Freeze Exemption", amount: 0, homeowner: false, senior: true }
+  ],
+  taxYears: [
+    { year: 2023, isBasis: false, inst1: { tax: 3191.01, due: "03/01/2024", paid: true, interest: 0, billed: true, billUrl: null }, inst2: { tax: 3710.76, due: "08/01/2024", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=LHRsjdC%2f4po%3d&installment=YqDOeLsN%2bQo%3d&billtype=HOE9o%2bYlPZo%3d" } },
+    { year: 2024, isBasis: true, inst1: { tax: 3795.97, due: "03/04/2025", paid: true, interest: 0, billed: true, billUrl: null }, inst2: { tax: 3093.84, due: "12/15/2025", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=fL0beK7mNqY%3d&installment=YqDOeLsN%2bQo%3d&billtype=HOE9o%2bYlPZo%3d" } },
+    { year: 2025, isBasis: false, inst1: { tax: 3789.42, due: "04/01/2026", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=sdSgOng%2f4ag%3d&installment=59nnfvD%2fudk%3d&billtype=HOE9o%2bYlPZo%3d" }, inst2: null }
+  ],
+  soldTax: { exists: false, year: null }
+};
+let mode=\'pin\', closeOwner=\'buyer\', rateVal=110, dayMode=\'365\', sellerType=\'individual\';
+const interestOverrides = {};
+const MO=[\'Jan\',\'Feb\',\'Mar\',\'Apr\',\'May\',\'Jun\',\'Jul\',\'Aug\',\'Sep\',\'Oct\',\'Nov\',\'Dec\'];
+const el = id => document.getElementById(id);
+const fmt = n => \'$\'+n.toLocaleString(\'en-US\',{minimumFractionDigits:2,maximumFractionDigits:2});
+function isLeap(y){return y%4===0&&(y%100!==0||y%400===0)}
+function dStr(d){return MO[d.getMonth()]+\' \'+d.getDate()}
+function doSendPrompt(text) {
+  if (typeof sendPrompt === \'function\') {
+    sendPrompt(text);
+  } else {
+    const msg = el(\'beep-msg\');
+    msg.style.display = \'block\';
+    msg.textContent = \'Type this into the chat to look up the property: "Cook County tax lookup — \' + text.replace(\'Cook County tax lookup — \',\'\') + \'"\';
+    const btn = el(\'beep-btn\');
+    btn.disabled = false;
+  }
+}
+function setMode(m){mode=m;el(\'ptog\').querySelectorAll(\'button\').forEach((b,i)=>b.classList.toggle(\'on\',(i===0&&m===\'pin\')||(i===1&&m===\'addr\')));el(\'si\').placeholder=m===\'pin\'?\'XX-XX-XXX-XXX-XXXX\':\'123 Main St, Chicago IL 60601\';}
+function beep(){const val=el(\'si\').value.trim();if(!val)return;const label=mode===\'pin\'?\'PIN\':\'address\';el(\'beep-msg\').style.display=\'none\';const btn=el(\'beep-btn\');btn.disabled=true;btn.innerHTML=\'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.68"/></svg> Looking up…\';try{doSendPrompt(\'Cook County tax lookup — \'+label+\': \'+val);}catch(e){btn.disabled=false;btn.innerHTML=\'Beep Beep!!\';el(\'beep-msg\').style.display=\'block\';el(\'beep-msg\').textContent=\'Could not send message automatically. Please type in chat: Cook County tax lookup — \'+label+\': \'+val;}}
+function goSearch(){el(\'cv\').style.display=\'none\';el(\'sv\').style.display=\'flex\';el(\'beep-btn\').disabled=false;el(\'beep-btn\').innerHTML=\'Beep Beep!!\';}
+function setClose(v){closeOwner=v;el(\'btn-buyer\').classList.toggle(\'on\',v===\'buyer\');el(\'btn-seller\').classList.toggle(\'on\',v===\'seller\');calc()}
+function setRate(r){rateVal=r;el(\'f-rate\').value=r;[100,105,110,115].forEach(x=>el(\'r\'+x).classList.toggle(\'on\',x===r));el(\'rcust\').classList.remove(\'on\');calc()}
+function focusCust(){[100,105,110,115].forEach(x=>el(\'r\'+x).classList.remove(\'on\'));el(\'rcust\').classList.add(\'on\');el(\'f-rate\').focus()}
+function custRate(){rateVal=parseFloat(el(\'f-rate\').value)||110;[100,105,110,115].forEach(x=>el(\'r\'+x).classList.toggle(\'on\',x===rateVal));if(![100,105,110,115].includes(rateVal))el(\'rcust\').classList.add(\'on\');calc()}
+function setDays(d){dayMode=d;el(\'d365\').classList.toggle(\'on\',d===\'365\');el(\'dact\').classList.toggle(\'on\',d===\'actual\');calc()}
+function setSeller(t){sellerType=t;el(\'btn-ind\').classList.toggle(\'on\',t===\'individual\');el(\'btn-ent\').classList.toggle(\'on\',t===\'entity\');calc()}
+function updateInterest(key, inputEl){interestOverrides[key]=parseFloat(inputEl.value)||0;calc();}
+function populate(){
+  const D=TAX_DATA;
+  if(!D||!D.fetched){el(\'cv\').style.display=\'none\';el(\'sv\').style.display=\'flex\';return}
+  el(\'sv\').style.display=\'none\';el(\'cv\').style.display=\'block\';
+  el(\'fetch-sub\').textContent=\'Seller\\\'s closing tax obligations · Data from Cook County Treasurer\';
+  el(\'fetch-badge\').textContent=\'AUTO-FILLED · \'+D.fetchDate;
+  if(D.soldTax&&D.soldTax.exists){el(\'sold-alert\').classList.add(\'show\');el(\'sold-yr\').textContent=D.soldTax.year;}
+  el(\'prop-addr-display\').textContent=D.property.address;
+  el(\'prop-sub-display\').textContent=\'PIN: \'+D.property.pin+\' · Volume \'+D.property.volume+\' · Owner: \'+D.property.owner;
+  if(D.property.isEntity){setSeller(\'entity\')}
+  if(!el(\'f-close\').value){const t=new Date();const yyyy=t.getFullYear();const mm=String(t.getMonth()+1).padStart(2,\'0\');const dd=String(t.getDate()).padStart(2,\'0\');el(\'f-close\').value=yyyy+\'-\'+mm+\'-\'+dd;}
+  buildTable(D);buildExemptions(D);calc();window.scrollTo(0,0);
+}
+function buildTable(D){const rows=D.taxYears||[];let html=\'\';rows.forEach(r=>{const isBasis=r.year===D.basisYear;html+=`<tr class="${isBasis?\'basis\':\'\'}">`;html+=`<td>${r.year}${isBasis?\' <span style="font-size:.7rem;font-weight:400;color:var(--g400);">Proration Basis</span>\':\'\'}</td>`;if(r.inst1){const i=r.inst1;const link=i.billUrl?` <a href="${i.billUrl}" target="_blank">View →</a>`:\'\';html+=`<td>${fmt(i.tax)}${link}<br><span style="font-size:.72rem;color:var(--g500)">Due ${i.due}</span></td>`;}else{html+=`<td class="nbilled">Not billed</td>`;}if(r.inst2){const i=r.inst2;const link=i.billUrl?` <a href="${i.billUrl}" target="_blank">View →</a>`:\'\';html+=`<td>${fmt(i.tax)}${link}<br><span style="font-size:.72rem;color:var(--g500)">Due ${i.due}</span></td>`;}else{html+=`<td class="nbilled">Not billed</td>`;}const fy=(r.inst1?r.inst1.tax:0)+(r.inst2?r.inst2.tax:0);html+=`<td>${fy>0?fmt(fy)+(r.fullYearPlus?\'+\':\'\'):\'—\'}</td>`;html+=`<td>${statusBadge(r)}</td>`;html+=\'</tr>\';});el(\'tax-tbody\').innerHTML=html||\'<tr><td colspan="5" style="text-align:center;color:var(--g400)">No data</td></tr>\';}
+function statusBadge(r){const u1=r.inst1&&!r.inst1.paid;const u2=r.inst2&&!r.inst2.paid;if(u1&&u2)return \'<span class="unpaid">Both Unpaid</span>\';if(u2)return \'<span class="unpaid">2nd Unpaid</span>\';if(u1)return \'<span class="unpaid">1st Unpaid</span>\';if(!r.inst2)return \'<span class="nbilled">1st Only</span>\';return \'<span class="paid">Paid</span>\';}
+function buildExemptions(D){const exs=D.exemptions||[];if(!exs.length||exs.every(e=>e.amount===0)){el(\'ex-display\').innerHTML=\'<span style="font-style:italic">No exemptions on file — \'+(D.property.isEntity?\'corporate-owned parcel. No Homeowner, Senior, or other personal exemptions apply.\':\'confirm with Treasurer.\')+\'</span>\';return;}let html=\'\';exs.forEach(e=>{if(e.amount>0){const ab=e.addBack?\' <span class="ex-addback">↑ Added back to proration basis</span>\':\'\';html+=`<div class="ex-row"><span class="ex-name">${e.name}</span><span class="ex-amt">−${fmt(e.amount)}${ab}</span></div>`;}});el(\'ex-display\').innerHTML=html||\'<span style="font-style:italic;color:var(--g400)">No exemptions on this bill.</span>\';}
+function calc(){
+  const D=TAX_DATA;if(!D||!D.fetched)return;
+  const bAfterEx=D.basisAfterExemptions||0;const bBeforeEx=D.basisBeforeExemptions||bAfterEx;
+  const exs=D.exemptions||[];const seniorTotal=exs.filter(e=>e.senior).reduce((s,e)=>s+e.amount,0);
+  let scA,scB;if(sellerType===\'entity\'){scA=bAfterEx;scB=bBeforeEx;}else{scA=bAfterEx;scB=bAfterEx+seniorTotal;}
+  const basis=scB;
+  el(\'sc-a\').textContent=fmt(scA);el(\'sc-b\').textContent=fmt(scB);
+  if(sellerType===\'entity\'){el(\'sc-a-note\').textContent=\'Bill as issued (with exemptions — entity should not have them)\';el(\'sc-b-note\').textContent=\'Pre-exemption amount — basis for entity seller\';}else{el(\'sc-a-note\').textContent=\'Full year bill as issued by County\';el(\'sc-b-note\').textContent=seniorTotal>0?\'Scenario A + \'+fmt(seniorTotal)+\' senior exemption(s) added back\':\'No senior exemptions to add back — same as Scenario A\';}
+  const escrow=scB-scA;if(escrow>0.01){el(\'escrow-banner\').style.display=\'flex\';el(\'escrow-val\').textContent=fmt(escrow);}else{el(\'escrow-banner\').style.display=\'none\';}
+  el(\'basis-note\').textContent=\'Proration uses \'+(sellerType===\'entity\'?\'Scenario B (pre-exemption amount, entity seller)\':seniorTotal>0?\'Scenario B (senior exemption(s) added back)\':\'Scenario A (no senior exemptions to adjust)\');
+  if(D.fetched){const exsCopy=(D.exemptions||[]).map(e=>({...e,addBack:(sellerType===\'entity\'&&e.amount>0)||(sellerType===\'individual\'&&e.senior&&e.amount>0)}));buildExemptions({...D,exemptions:exsCopy});}
+  const closingStr=el(\'f-close\').value;
+  if(!closingStr||basis<=0){el(\'sum-ph\').style.display=\'block\';el(\'sum-body\').style.display=\'none\';el(\'detail-card\').style.display=\'none\';el(\'county-card\').style.display=\'none\';return;}
+  const parts=closingStr.split(\'-\');const closingDate=new Date(+parts[0],+parts[1]-1,+parts[2],12,0,0);const cy=closingDate.getFullYear();const basisYear=D.basisYear||2024;
+  let sellerLast=new Date(closingDate);if(closeOwner===\'buyer\')sellerLast=new Date(+parts[0],+parts[1]-1,+parts[2]-1,12,0,0);
+  const jan1=new Date(cy,0,1,12,0,0);const sellerDays=Math.round((sellerLast-jan1)/86400000)+1;
+  const yrDays=dayMode===\'actual\'?(isLeap(basisYear)?366:365):365;const proRate=rateVal/100;const proratedAnnual=basis*proRate;const perDiem=proratedAnnual/yrDays;const cyProration=perDiem*sellerDays;
+  const taxYears=D.taxYears||[];const countyItems=[];
+  taxYears.forEach(yr=>{[[yr.inst1,0],[yr.inst2,1]].forEach(([inst,idx])=>{if(inst&&!inst.paid&&inst.billed!==false){const key=yr.year+\'-\'+idx;const interest=interestOverrides[key]!==undefined?interestOverrides[key]:(inst.interest||0);countyItems.push({key,label:`Tax Year ${yr.year} · ${idx===0?\'1st\':\'2nd\'} Installment`,tax:inst.tax,interest,total:inst.tax+interest,due:inst.due,billUrl:inst.billUrl});}});});
+  const creditItems=[];const yr25=taxYears.find(y=>y.year===basisYear+1)||null;const inst25_1=yr25&&yr25.inst1?yr25.inst1:null;const inst25_2=yr25&&yr25.inst2?yr25.inst2:null;
+  if(!inst25_2){let credit25_2;if(inst25_1&&inst25_1.billed!==false){credit25_2=proratedAnnual-inst25_1.tax;}else{credit25_2=proratedAnnual;}if(credit25_2>0){const lbl=inst25_1&&inst25_1.billed!==false?`Tax Year ${basisYear+1} · 2nd Installment (est., unbilled)`:`Tax Year ${basisYear+1} · Full Year (est., unbilled)`;const sub=inst25_1&&inst25_1.billed!==false?`${fmt(proratedAnnual)} prorated annual − ${fmt(inst25_1.tax)} billed 1st install = est. 2nd`:`½ prorated annual (${fmt(basis)} × ${rateVal}% ÷ 2) — no ${basisYear+1} installments billed yet`;creditItems.push({label:lbl,sub,amount:credit25_2,dest:\'→ Credit to Buyer\'});}}
+  creditItems.push({label:`Tax Year ${cy} · Proration (Jan 1–${dStr(sellerLast)})`,sub:`${sellerDays} days × ${fmt(perDiem)}/day · basis: ${basisYear} full year ${fmt(basis)} × ${rateVal}%`,amount:cyProration,dest:\'→ Credit to Buyer\'});
+  if(countyItems.length){el(\'county-card\').style.display=\'block\';let html=\'\';countyItems.forEach(c=>{const link=c.billUrl?` <a href="${c.billUrl}" target="_blank" style="font-size:.72rem;color:var(--blue)">View Bill →</a>`:\'\';html+=`<div class="g3" style="margin-bottom:.875rem"><div class="f"><label>${c.label} Tax</label><input type="number" value="${c.tax.toFixed(2)}" readonly/></div><div class="f"><label>Interest (as of closing)</label><input type="number" step=".01" value="${c.interest.toFixed(2)}" id="int-${c.key}" oninput="updateInterest(\'${c.key}\',this)"/></div><div class="f"><label>Total Due${link}</label><input type="number" value="${c.total.toFixed(2)}" readonly id="tot-${c.key}"/></div></div>`;});el(\'county-rows\').innerHTML=html;}else{el(\'county-card\').style.display=\'none\';}
+  el(\'sum-ph\').style.display=\'none\';el(\'sum-body\').style.display=\'block\';el(\'detail-card\').style.display=\'block\';
+  let countyHTML=\'\';let countyTotal=0;if(countyItems.length){countyItems.forEach(c=>{countyTotal+=c.total;countyHTML+=`<div class="si2 county"><div class="sil"><h4>${c.label}</h4><p>Tax ${fmt(c.tax)} + Interest ${fmt(c.interest)} · Due ${c.due}</p></div><div class="sia"><span class="sd red">${fmt(c.total)}</span><span class="sdt">→ Cook County Treasurer</span></div></div>`;});}else{countyHTML=\'<div class="si2 county"><div class="sil"><h4>No unpaid billed installments on file</h4><p>Confirm with County Treasurer at closing</p></div></div>\';}
+  el(\'sum-county-rows\').innerHTML=countyHTML;
+  let creditHTML=\'\';let buyerTotal=0;creditItems.forEach(c=>{buyerTotal+=c.amount;creditHTML+=`<div class="si2 credit"><div class="sil"><h4>${c.label}</h4><p>${c.sub}</p></div><div class="sia"><span class="sd purple">${fmt(c.amount)}</span><span class="sdt">${c.dest}</span></div></div>`;});
+  el(\'sum-credit-rows\').innerHTML=creditHTML;
+  const est25_2=inst25_1&&inst25_1.billed!==false?proratedAnnual-inst25_1.tax:proratedAnnual;
+  el(\'d-byr\').textContent=basisYear;el(\'d-bill\').textContent=fmt(basis);el(\'d-rate\').textContent=rateVal+\'%\';el(\'d-annual\').textContent=fmt(proratedAnnual);el(\'d-days\').textContent=yrDays;el(\'d-diem\').textContent=fmt(perDiem)+\'/day\';
+  el(\'d-sdays-lbl\').textContent=`${cy} Seller Days (Jan 1–Closing)`;el(\'d-sdays\').textContent=`${sellerDays} days (Jan 1–${dStr(sellerLast)})`;el(\'d-pyr-lbl\').textContent=`${cy} Proration Credit`;el(\'d-pcredit\').textContent=fmt(cyProration);
+  el(\'d-est25-lbl\').textContent=`${basisYear+1} 2nd Inst. (Est., Unbilled)`;el(\'d-est25\').textContent=fmt(est25_2);
+  el(\'d-formula\').textContent=`${basisYear+1} 2nd (est.): ${fmt(basis)} × ${rateVal}% ${inst25_1&&inst25_1.billed!==false?\'− \'+fmt(inst25_1.tax)+\' (billed 1st)\':\' ÷ 2\'} = ${fmt(est25_2)}\\
+${cy} Proration:   ${fmt(basis)} × ${rateVal}% ÷ ${yrDays} × ${sellerDays} days = ${fmt(cyProration)}`;
+  el(\'d-sumbar\').innerHTML=`<strong>Closing:</strong> ${dStr(closingDate)}, ${cy} · <strong>Closing day:</strong> ${closeOwner} · <strong>Seller days in ${cy}:</strong> ${sellerDays} · <strong>Proration basis:</strong> ${basisYear} full year ${fmt(basis)} (${sellerType===\'entity\'?\'entity — pre-exemption\':seniorTotal>0?\'senior exemption added back\':\'individual — billed amount\'}) · <strong>Rate:</strong> ${rateVal}% · <strong>Daily:</strong> ${fmt(perDiem)}`;
+  el(\'t-county\').textContent=countyTotal>0?fmt(countyTotal):\'$0.00\';el(\'t-buyer\').textContent=fmt(buyerTotal)+(D.soldTax&&D.soldTax.exists?\' ⚠ Sold tax redemption not included\':\'\');
+}
+function copyLink(){const url=window.location.href;const btn=el(\'link-btn-txt\');const doFallback=()=>{try{window.prompt(\'Copy this link:\',url)}catch(e){}};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(()=>{btn.textContent=\'Copied!\';el(\'link-btn\').style.background=\'#dcfce7\';el(\'link-btn\').style.borderColor=\'#86efac\';setTimeout(()=>{btn.textContent=\'Copy Link\';el(\'link-btn\').style.background=\'\';el(\'link-btn\').style.borderColor=\'\';},2000);}).catch(doFallback);}else{doFallback();}}
+if(document.readyState===\'loading\'){document.addEventListener(\'DOMContentLoaded\',populate);}else{populate();}
+</script>
+
+"}'}]}]}, 'uuid': '26ec6305-128f-428c-b9f2-b136af18823c', 'timestamp': '2026-05-23T00:21:07.358Z', 'toolUseResult': [{'type': 'text', 'text': '{"text":"<!DOCTYPE html>
+<html lang="en">
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cook County — Tax Credit Calculator</title>
+<style>
+:root{color-scheme:light;--blue:#2563eb;--blue-dk:#1d4ed8;--blue-lt:#eff6ff;--blue-bd:#bfdbfe;--red:#dc2626;--red-lt:#fef2f2;--red-bd:#fecaca;--green:#16a34a;--purple:#7c3aed;--purple-lt:#faf5ff;--purple-bd:#ddd6fe;--amber:#d97706;--amber-lt:#fffbeb;--amber-bd:#fcd34d;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;background:#f1f5f9;color:var(--g900);font-size:14px;min-height:100vh}
+#sv{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem}
+.sl h1{font-size:1.75rem;font-weight:300;color:var(--g600);text-align:center}
+.sl h1 strong{font-weight:700;color:var(--g800)}
+.sl p{text-align:center;color:var(--g400);font-size:.8rem;margin-top:.3rem}
+.sc{width:100%;max-width:500px;background:#fff;border:1px solid var(--g200);border-radius:14px;padding:1.75rem;margin-top:1.5rem;box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.ptog{display:flex;background:var(--g100);border-radius:8px;padding:3px;margin-bottom:1rem}
+.ptog button{flex:1;padding:.45rem;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:.825rem;font-weight:500;color:var(--g500);transition:all .15s}
+.ptog button.on{background:#fff;color:var(--g900);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.si{width:100%;padding:.75rem 1rem;border:1.5px solid var(--g200);border-radius:8px;font-size:.95rem;outline:none;margin-bottom:1rem;transition:border-color .15s}
+.si:focus{border-color:var(--blue)}
+.bb{width:100%;padding:.875rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .15s}
+.bb:hover{background:var(--blue-dk)}
+.bb:active{transform:scale(.98)}
+.bb:disabled{background:var(--g400);cursor:not-allowed;transform:none}
+#cv{display:none;max-width:980px;margin:0 auto;padding:1.5rem 1rem 5rem}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem}
+.ph h1{font-size:1.35rem;font-weight:300;color:var(--g600)}
+.ph h1 strong{font-weight:700;color:var(--g800)}
+.ph p{font-size:.75rem;color:var(--g400);margin-top:.2rem}
+.back{padding:.4rem .85rem;border:1px solid var(--g300);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;color:var(--g500)}
+.back:hover{background:var(--g50)}
+.alert-sold{display:none;background:var(--amber-lt);border:1px solid var(--amber-bd);border-left:4px solid var(--amber);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.825rem;line-height:1.6}
+.alert-sold.show{display:block}
+.alert-sold strong{color:#92400e}
+.alert-sold a{color:var(--blue)}
+.card{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:1.375rem 1.5rem;margin-bottom:1.25rem}
+.ch{display:flex;align-items:center;gap:.75rem;padding-bottom:.875rem;margin-bottom:1.125rem;border-bottom:1px solid var(--g200)}
+.ct{font-size:.64rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--blue)}
+.cs{font-size:.64rem;font-weight:600;color:var(--g400);letter-spacing:.05em}
+.cb{font-size:.64rem;font-weight:700;letter-spacing:.05em;padding:.2rem .5rem;border-radius:4px;margin-left:auto}
+.cb.green{background:#dcfce7;color:#166534}
+.cb.amber{background:var(--amber-lt);color:#92400e}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+.ga{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem}
+.f{display:flex;flex-direction:column;gap:.35rem}
+.f label{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500)}
+.f input,.f select{padding:.55rem .75rem;border:1px solid var(--g300);border-radius:6px;font-size:.9rem;color:var(--g800);outline:none;width:100%;background:#fff;transition:border-color .15s}
+.f input:focus,.f select:focus{border-color:var(--blue)}
+.f input[readonly]{background:var(--g50);font-weight:600}
+.f input:disabled{background:var(--g100);color:var(--g400)}
+.hint{font-size:.7rem;color:var(--g400);margin-top:.15rem}
+.bg{display:flex}
+.bg button{flex:1;padding:.52rem .6rem;border:1px solid var(--g300);border-left:none;background:#fff;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--g600);transition:all .13s;text-align:center}
+.bg button:first-child{border-left:1px solid var(--g300);border-radius:6px 0 0 6px}
+.bg button:last-child{border-radius:0 6px 6px 0}
+.bg button.on{background:var(--blue);border-color:var(--blue);color:#fff;z-index:1}
+.bg button:hover:not(.on){background:var(--g50)}
+.tt{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1rem}
+.tt th{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);padding:.45rem .75rem;text-align:left;border-bottom:1px solid var(--g200)}
+.tt td{padding:.6rem .75rem;border-bottom:1px solid var(--g100);color:var(--g700);vertical-align:middle}
+.tt tr.basis td{background:var(--g50);font-weight:700}
+.tt a{color:var(--blue);font-size:.78rem;text-decoration:none;white-space:nowrap}
+.tt a:hover{text-decoration:underline}
+.paid{color:var(--green);font-weight:700;font-size:.75rem}
+.unpaid{color:var(--red);font-weight:700;font-size:.75rem}
+.nbilled{color:var(--g400);font-size:.8rem;font-style:italic}
+.exbox{background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:.75rem 1rem;font-size:.82rem;color:var(--g600);margin-top:.75rem;line-height:1.6}
+.ex-row{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0}
+.ex-name{color:var(--g700)}
+.ex-amt{font-weight:600;color:var(--g800)}
+.ex-addback{font-size:.72rem;color:var(--amber);font-weight:600;margin-left:.5rem}
+.sp{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin:.875rem 0}
+.sb{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:.875rem 1rem}
+.sl2{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);margin-bottom:.35rem}
+.sv2{font-size:1.2rem;font-weight:700;color:var(--g800)}
+.sn{font-size:.7rem;color:var(--g400);margin-top:.25rem}
+.eb{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;background:var(--blue-lt);border:1.5px solid var(--blue-bd);border-radius:8px;padding:.875rem 1.125rem;margin-top:.875rem}
+.el{font-size:.85rem;color:var(--blue);font-weight:500}
+.ev{font-size:1.2rem;font-weight:800;color:var(--blue)}
+.ssl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin:1rem 0 .5rem}
+.si2{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border:1px solid var(--g200);border-radius:8px;padding:.875rem 1.125rem;margin-bottom:.5rem}
+.si2.credit{border-color:var(--purple-bd);background:var(--purple-lt)}
+.si2.county{border-color:var(--red-bd);background:var(--red-lt)}
+.sil h4{font-size:.875rem;font-weight:600;color:var(--g800);margin-bottom:.2rem}
+.sil p{font-size:.72rem;color:var(--g400)}
+.sia{text-align:right;flex-shrink:0}
+.sd{display:block;font-size:1.15rem;font-weight:800}
+.sd.purple{color:var(--purple)}
+.sd.red{color:var(--red)}
+.sdt{display:block;font-size:.68rem;color:var(--g400);margin-top:.15rem}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
+.dc{background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:.75rem 1rem}
+.dcl{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g400);margin-bottom:.25rem}
+.dcv{font-size:1rem;font-weight:700;color:var(--g800)}
+.fb{background:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:.875rem 1rem;font-family:\'Menlo\',\'Courier New\',monospace;font-size:.78rem;color:#713f12;line-height:1.8;margin-bottom:.875rem;white-space:pre-wrap}
+.sumbar{border-left:4px solid var(--blue);background:var(--g50);border-radius:0 6px 6px 0;padding:.875rem 1rem;font-size:.78rem;color:var(--g600);line-height:1.8;margin-bottom:1rem}
+.sumbar strong{color:var(--g800)}
+.totrow{display:flex;justify-content:space-between;font-size:.78rem;color:var(--g500);flex-wrap:wrap;gap:.5rem}
+.totrow strong{color:var(--g800)}
+.ph-box{text-align:center;padding:2rem;color:var(--g400);font-size:.875rem;border:1px dashed var(--g200);border-radius:8px}
+@media(max-width:600px){.g2,.g3,.dg,.sp{grid-template-columns:1fr}.ga{grid-template-columns:1fr 1fr}}
+.print-btn{padding:.4rem .85rem;border:1px solid var(--g300);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;color:var(--g500);display:inline-flex;align-items:center;gap:.35rem}
+.print-btn:hover{background:var(--g50)}
+.print-bar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.file-link{font-size:.72rem;color:var(--blue);word-break:break-all}
+@media print{#sv{display:none!important}#cv{display:block!important;max-width:100%;padding:.5rem}.back,.print-bar{display:none!important}.card{break-inside:avoid;box-shadow:none;border:1px solid #ccc;margin-bottom:.75rem}body{background:#fff;font-size:12px}.bb,.ptog{display:none}}
+</style>
+
+
+<div id="sv">
+  <div class="sl">
+    <h1>Cook County — <strong>Tax Credit Calculator</strong></h1>
+    <p>Seller\'s closing tax obligations · Proration &amp; credit calculator</p>
+  </div>
+  <div class="sc">
+    <div class="ptog" id="ptog">
+      <button class="on" onclick="setMode(\'pin\')">PIN</button>
+      <button onclick="setMode(\'addr\')">Property Address</button>
+    </div>
+    <input id="si" class="si" type="text" placeholder="XX-XX-XXX-XXX-XXXX" onkeydown="if(event.key===\'Enter\')beep()"/>
+    <button class="bb" id="beep-btn" onclick="beep()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><ellipse cx="14" cy="13" rx="5" ry="4.5" fill="rgba(255,255,255,.85)"/><circle cx="19" cy="9.5" r="3.5" fill="rgba(255,255,255,.85)"/><polygon points="21.5,9.5 24,8.5 21.5,10.5" fill="#fbbf24"/><path d="M18.5 6Q19.5 4 20 3Q19 5 21 5Q19 6 20 7Z" fill="rgba(255,255,255,.9)"/><circle cx="20" cy="9" r=".9" fill="#1e40af"/><line x1="10" y1="17.5" x2="7.5" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="1.4" stroke-linecap="round"/><line x1="14" y1="17.5" x2="16.5" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="1.4" stroke-linecap="round"/><line x1="7.5" y1="22" x2="5" y2="21" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"/><line x1="16.5" y1="22" x2="19" y2="21" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"/><path d="M9 13Q6 11 5 9Q7 11 6 8Q8 11 7 7" stroke="rgba(255,255,255,.75)" stroke-width="1.2" fill="none" stroke-linecap="round"/><line x1="1" y1="10" x2="4" y2="10" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/><line x1="0" y1="13" x2="3" y2="13" stroke="rgba(255,255,255,.45)" stroke-width="1" stroke-linecap="round"/></svg>
+      Beep Beep!!
+    </button>
+    <div id="beep-msg" style="display:none;margin-top:.75rem;padding:.6rem .9rem;background:#fefce8;border:1px solid #fde68a;border-radius:6px;font-size:.78rem;color:#92400e;line-height:1.5"></div>
+  </div>
+  <p style="margin-top:1rem;font-size:.72rem;color:var(--g400);text-align:center">
+    Looks up live data from <a href="https://www.cookcountytreasurer.com" target="_blank" style="color:var(--blue)">cookcountytreasurer.com</a>
+  </p>
+</div>
+<div id="cv">
+  <div class="ph">
+    <div>
+      <h1>Cook County — <strong>Tax Credit Calculator</strong></h1>
+      <p id="fetch-sub">Seller\'s closing tax obligations · Data from Cook County Treasurer</p>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="print-btn" onclick="window.print()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print / Save PDF</button>
+      <button class="print-btn" id="link-btn" onclick="copyLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span id="link-btn-txt">Copy Link</span></button>
+      <button class="back" onclick="goSearch()">← New Search</button>
+    </div>
+  </div>
+  <div class="alert-sold" id="sold-alert">
+    <strong>⚠ SOLD TAX — Tax Year <span id="sold-yr">????</span>:</strong>
+    Delinquent taxes were sold to a tax buyer. Obtain current redemption amount from the
+    <a href="https://www.cookcountyclerkofcourt.org" target="_blank">Cook County Clerk of Court</a>
+    before closing. Check Circuit Court for pending tax deed petition.
+    <em>Amount not reflected in calculations below.</em>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">County Records — Treasurer</span><span class="cs" id="fetch-badge">—</span></div>
+    <div style="margin-bottom:.5rem">
+      <div style="font-size:1.05rem;font-weight:700;color:var(--g800)" id="prop-addr-display">—</div>
+      <div style="font-size:.8rem;color:var(--g500);margin-top:.2rem" id="prop-sub-display">—</div>
+    </div>
+    <div style="margin-top:1rem">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.5rem">Tax Bill History</div>
+      <table class="tt">
+        <thead><tr><th>Tax Year</th><th>1st Installment</th><th>2nd Installment</th><th>Full Year</th><th>Status</th></tr></thead>
+        <tbody id="tax-tbody"><tr><td colspan="5" style="text-align:center;color:var(--g400);padding:1rem">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.35rem">Seller\'s Exemptions on Bill</div>
+    <div class="exbox" id="ex-display">—</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Para 150-153 · Exemption Adjustment</span></div>
+    <div style="margin-bottom:1rem">
+      <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:.4rem">Seller Type</div>
+      <div class="bg" style="max-width:300px">
+        <button class="on" id="btn-ind" onclick="setSeller(\'individual\')">Individual</button>
+        <button id="btn-ent" onclick="setSeller(\'entity\')">Entity (Corp/LLC/Trust)</button>
+      </div>
+      <div class="hint" style="margin-top:.35rem">Entity sellers cannot hold exemptions — pre-exemption amount is used as proration basis.</div>
+    </div>
+    <div class="sp">
+      <div class="sb"><div class="sl2">Scenario A — Billed Amount</div><div class="sv2" id="sc-a">$0.00</div><div class="sn" id="sc-a-note">Full year bill as issued</div></div>
+      <div class="sb"><div class="sl2">Scenario B — Adjusted Proration Basis</div><div class="sv2" id="sc-b">$0.00</div><div class="sn" id="sc-b-note">Scenario A + senior exemptions added back</div></div>
+    </div>
+    <div class="eb" id="escrow-banner" style="display:none"><div class="el">Escrow this difference per Contract Para 150-153</div><div class="ev" id="escrow-val">$0.00</div></div>
+    <div class="hint" style="margin-top:.625rem" id="basis-note">Proration will use Scenario A.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Closing Settings</span></div>
+    <div class="g2" style="margin-bottom:1rem">
+      <div class="f"><label>Closing Date</label><input type="date" id="f-close" oninput="calc()"/></div>
+      <div class="f">
+        <label>Closing Day Belongs To</label>
+        <div class="bg"><button class="on" id="btn-buyer" onclick="setClose(\'buyer\')">Buyer</button><button id="btn-seller" onclick="setClose(\'seller\')">Seller</button></div>
+        <span class="hint">Most Cook County contracts: buyer owns closing day</span>
+      </div>
+    </div>
+    <div class="f" style="margin-bottom:1rem">
+      <label>Proration Rate</label>
+      <div class="bg">
+        <button id="r100" onclick="setRate(100)">100%</button>
+        <button id="r105" onclick="setRate(105)">105%</button>
+        <button id="r110" class="on" onclick="setRate(110)">110%</button>
+        <button id="r115" onclick="setRate(115)">115%</button>
+        <button id="rcust" onclick="focusCust()">Custom</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>Rate (%)</label><input type="number" step=".1" id="f-rate" value="110" oninput="custRate()"/></div>
+      <div class="f">
+        <label>Day Count</label>
+        <div class="bg"><button class="on" id="d365" onclick="setDays(\'365\')">365-day</button><button id="dact" onclick="setDays(\'actual\')">Actual</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="county-card" style="display:none">
+    <div class="ch"><span class="ct">Seller Pays → County (Unpaid Billed Installments + Interest)</span></div>
+    <div id="county-rows"></div>
+    <div class="hint">Interest accrues daily — update amounts at closing. Paid to Cook County Treasurer only, not credited to buyer.</div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">Closing Summary — Seller\'s Tax Obligations</span></div>
+    <div id="sum-ph" class="ph-box">Enter closing date above to see closing summary.</div>
+    <div id="sum-body" style="display:none">
+      <div class="ssl">Seller Pays → County</div>
+      <div id="sum-county-rows"><div class="si2 county"><div class="sil"><h4>No unpaid billed installments on file</h4><p>Confirm with County Treasurer at closing</p></div></div></div>
+      <div class="ssl" style="margin-top:1.25rem">Seller Credits → Buyer</div>
+      <div id="sum-credit-rows"></div>
+    </div>
+  </div>
+  <div class="card" id="detail-card" style="display:none">
+    <div class="ch"><span class="ct">Proration Calculation Detail</span></div>
+    <div class="dg">
+      <div class="dc"><div class="dcl">Proration Basis (<span id="d-byr">2024</span> Full Year)</div><div class="dcv" id="d-bill"></div></div>
+      <div class="dc"><div class="dcl">× Proration Rate</div><div class="dcv" id="d-rate"></div></div>
+      <div class="dc"><div class="dcl">= Prorated Annual Estimate</div><div class="dcv" id="d-annual"></div></div>
+      <div class="dc"><div class="dcl">÷ Year Days</div><div class="dcv" id="d-days"></div></div>
+      <div class="dc"><div class="dcl">= Per Diem</div><div class="dcv" id="d-diem"></div></div>
+      <div class="dc"><div class="dcl" id="d-sdays-lbl">Seller Days in Closing Year</div><div class="dcv" id="d-sdays"></div></div>
+      <div class="dc"><div class="dcl" id="d-pyr-lbl">Closing Year Proration Credit</div><div class="dcv" id="d-pcredit"></div></div>
+      <div class="dc"><div class="dcl" id="d-est25-lbl">2025 2nd Inst. (Est., Unbilled)</div><div class="dcv" id="d-est25"></div></div>
+    </div>
+    <div class="fb" id="d-formula"></div>
+    <div class="sumbar" id="d-sumbar"></div>
+    <div class="totrow"><span>Total seller pays county: <strong id="t-county">—</strong></span><span>Total buyer credits: <strong id="t-buyer">—</strong></span></div>
+  </div>
+</div>
+<script>
+const TAX_DATA = {
+  fetched: true,
+  fetchDate: "May 13, 2026",
+  property: {
+    address: "4340 MAYFAIR CT, COUNTRY CLUB HILLS, IL 60478",
+    pin: "28-34-413-020-0000",
+    owner: "DOREEN A GERMANY",
+    volume: "035",
+    isEntity: false
+  },
+  basisYear: 2024,
+  basisBeforeExemptions: 8689.66,
+  basisAfterExemptions: 6889.81,
+  exemptions: [
+    { name: "Homeowner\'s Exemption", amount: 1799.85, homeowner: true, senior: false },
+    { name: "Senior Citizen Exemption", amount: 0, homeowner: false, senior: true },
+    { name: "Senior Freeze Exemption", amount: 0, homeowner: false, senior: true }
+  ],
+  taxYears: [
+    { year: 2023, isBasis: false, inst1: { tax: 3191.01, due: "03/01/2024", paid: true, interest: 0, billed: true, billUrl: null }, inst2: { tax: 3710.76, due: "08/01/2024", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=LHRsjdC%2f4po%3d&installment=YqDOeLsN%2bQo%3d&billtype=HOE9o%2bYlPZo%3d" } },
+    { year: 2024, isBasis: true, inst1: { tax: 3795.97, due: "03/04/2025", paid: true, interest: 0, billed: true, billUrl: null }, inst2: { tax: 3093.84, due: "12/15/2025", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=fL0beK7mNqY%3d&installment=YqDOeLsN%2bQo%3d&billtype=HOE9o%2bYlPZo%3d" } },
+    { year: 2025, isBasis: false, inst1: { tax: 3789.42, due: "04/01/2026", paid: true, interest: 0, billed: true, billUrl: "https://reportingservices.cookcountytreasurer.com/electronictaxbills/viewpropertytaxbill.aspx?pin=YYFJhb%2bwzV%2fUuhw5fsN%2fKQ%3d%3d&taxyear=sdSgOng%2f4ag%3d&installment=59nnfvD%2fudk%3d&billtype=HOE9o%2bYlPZo%3d" }, inst2: null }
+  ],
+  soldTax: { exists: false, year: null }
+};
+let mode=\'pin\', closeOwner=\'buyer\', rateVal=110, dayMode=\'365\', sellerType=\'individual\';
+const interestOverrides = {};
+const MO=[\'Jan\',\'Feb\',\'Mar\',\'Apr\',\'May\',\'Jun\',\'Jul\',\'Aug\',\'Sep\',\'Oct\',\'Nov\',\'Dec\'];
+const el = id => document.getElementById(id);
+const fmt = n => \'$\'+n.toLocaleString(\'en-US\',{minimumFractionDigits:2,maximumFractionDigits:2});
+function isLeap(y){return y%4===0&&(y%100!==0||y%400===0)}
+function dStr(d){return MO[d.getMonth()]+\' \'+d.getDate()}
+function doSendPrompt(text) {
+  if (typeof sendPrompt === \'function\') {
+    sendPrompt(text);
+  } else {
+    const msg = el(\'beep-msg\');
+    msg.style.display = \'block\';
+    msg.textContent = \'Type this into the chat to look up the property: "Cook County tax lookup — \' + text.replace(\'Cook County tax lookup — \',\'\') + \'"\';
+    const btn = el(\'beep-btn\');
+    btn.disabled = false;
+  }
+}
+function setMode(m){mode=m;el(\'ptog\').querySelectorAll(\'button\').forEach((b,i)=>b.classList.toggle(\'on\',(i===0&&m===\'pin\')||(i===1&&m===\'addr\')));el(\'si\').placeholder=m===\'pin\'?\'XX-XX-XXX-XXX-XXXX\':\'123 Main St, Chicago IL 60601\';}
+function beep(){const val=el(\'si\').value.trim();if(!val)return;const label=mode===\'pin\'?\'PIN\':\'address\';el(\'beep-msg\').style.display=\'none\';const btn=el(\'beep-btn\');btn.disabled=true;btn.innerHTML=\'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.68"/></svg> Looking up…\';try{doSendPrompt(\'Cook County tax lookup — \'+label+\': \'+val);}catch(e){btn.disabled=false;btn.innerHTML=\'Beep Beep!!\';el(\'beep-msg\').style.display=\'block\';el(\'beep-msg\').textContent=\'Could not send message automatically. Please type in chat: Cook County tax lookup — \'+label+\': \'+val;}}
+function goSearch(){el(\'cv\').style.display=\'none\';el(\'sv\').style.display=\'flex\';el(\'beep-btn\').disabled=false;el(\'beep-btn\').innerHTML=\'Beep Beep!!\';}
+function setClose(v){closeOwner=v;el(\'btn-buyer\').classList.toggle(\'on\',v===\'buyer\');el(\'btn-seller\').classList.toggle(\'on\',v===\'seller\');calc()}
+function setRate(r){rateVal=r;el(\'f-rate\').value=r;[100,105,110,115].forEach(x=>el(\'r\'+x).classList.toggle(\'on\',x===r));el(\'rcust\').classList.remove(\'on\');calc()}
+function focusCust(){[100,105,110,115].forEach(x=>el(\'r\'+x).classList.remove(\'on\'));el(\'rcust\').classList.add(\'on\');el(\'f-rate\').focus()}
+function custRate(){rateVal=parseFloat(el(\'f-rate\').value)||110;[100,105,110,115].forEach(x=>el(\'r\'+x).classList.toggle(\'on\',x===rateVal));if(![100,105,110,115].includes(rateVal))el(\'rcust\').classList.add(\'on\');calc()}
+function setDays(d){dayMode=d;el(\'d365\').classList.toggle(\'on\',d===\'365\');el(\'dact\').classList.toggle(\'on\',d===\'actual\');calc()}
+function setSeller(t){sellerType=t;el(\'btn-ind\').classList.toggle(\'on\',t===\'individual\');el(\'btn-ent\').classList.toggle(\'on\',t===\'entity\');calc()}
+function updateInterest(key, inputEl){interestOverrides[key]=parseFloat(inputEl.value)||0;calc();}
+function populate(){
+  const D=TAX_DATA;
+  if(!D||!D.fetched){el(\'cv\').style.display=\'none\';el(\'sv\').style.display=\'flex\';return}
+  el(\'sv\').style.display=\'none\';el(\'cv\').style.display=\'block\';
+  el(\'fetch-sub\').textContent=\'Seller\\\'s closing tax obligations · Data from Cook County Treasurer\';
+  el(\'fetch-badge\').textContent=\'AUTO-FILLED · \'+D.fetchDate;
+  if(D.soldTax&&D.soldTax.exists){el(\'sold-alert\').classList.add(\'show\');el(\'sold-yr\').textContent=D.soldTax.year;}
+  el(\'prop-addr-display\').textContent=D.property.address;
+  el(\'prop-sub-display\').textContent=\'PIN: \'+D.property.pin+\' · Volume \'+D.property.volume+\' · Owner: \'+D.property.owner;
+  if(D.property.isEntity){setSeller(\'entity\')}
+  if(!el(\'f-close\').value){const t=new Date();const yyyy=t.getFullYear();const mm=String(t.getMonth()+1).padStart(2,\'0\');const dd=String(t.getDate()).padStart(2,\'0\');el(\'f-close\').value=yyyy+\'-\'+mm+\'-\'+dd;}
+  buildTable(D);buildExemptions(D);calc();window.scrollTo(0,0);
+}
+function buildTable(D){const rows=D.taxYears||[];let html=\'\';rows.forEach(r=>{const isBasis=r.year===D.basisYear;html+=`<tr class="${isBasis?\'basis\':\'\'}">`;html+=`<td>${r.year}${isBasis?\' <span style="font-size:.7rem;font-weight:400;color:var(--g400);">Proration Basis</span>\':\'\'}</td>`;if(r.inst1){const i=r.inst1;const link=i.billUrl?` <a href="${i.billUrl}" target="_blank">View →</a>`:\'\';html+=`<td>${fmt(i.tax)}${link}<br><span style="font-size:.72rem;color:var(--g500)">Due ${i.due}</span></td>`;}else{html+=`<td class="nbilled">Not billed</td>`;}if(r.inst2){const i=r.inst2;const link=i.billUrl?` <a href="${i.billUrl}" target="_blank">View →</a>`:\'\';html+=`<td>${fmt(i.tax)}${link}<br><span style="font-size:.72rem;color:var(--g500)">Due ${i.due}</span></td>`;}else{html+=`<td class="nbilled">Not billed</td>`;}const fy=(r.inst1?r.inst1.tax:0)+(r.inst2?r.inst2.tax:0);html+=`<td>${fy>0?fmt(fy)+(r.fullYearPlus?\'+\':\'\'):\'—\'}</td>`;html+=`<td>${statusBadge(r)}</td>`;html+=\'</tr>\';});el(\'tax-tbody\').innerHTML=html||\'<tr><td colspan="5" style="text-align:center;color:var(--g400)">No data</td></tr>\';}
+function statusBadge(r){const u1=r.inst1&&!r.inst1.paid;const u2=r.inst2&&!r.inst2.paid;if(u1&&u2)return \'<span class="unpaid">Both Unpaid</span>\';if(u2)return \'<span class="unpaid">2nd Unpaid</span>\';if(u1)return \'<span class="unpaid">1st Unpaid</span>\';if(!r.inst2)return \'<span class="nbilled">1st Only</span>\';return \'<span class="paid">Paid</span>\';}
+function buildExemptions(D){const exs=D.exemptions||[];if(!exs.length||exs.every(e=>e.amount===0)){el(\'ex-display\').innerHTML=\'<span style="font-style:italic">No exemptions on file — \'+(D.property.isEntity?\'corporate-owned parcel. No Homeowner, Senior, or other personal exemptions apply.\':\'confirm with Treasurer.\')+\'</span>\';return;}let html=\'\';exs.forEach(e=>{if(e.amount>0){const ab=e.addBack?\' <span class="ex-addback">↑ Added back to proration basis</span>\':\'\';html+=`<div class="ex-row"><span class="ex-name">${e.name}</span><span class="ex-amt">−${fmt(e.amount)}${ab}</span></div>`;}});el(\'ex-display\').innerHTML=html||\'<span style="font-style:italic;color:var(--g400)">No exemptions on this bill.</span>\';}
+function calc(){
+  const D=TAX_DATA;if(!D||!D.fetched)return;
+  const bAfterEx=D.basisAfterExemptions||0;const bBeforeEx=D.basisBeforeExemptions||bAfterEx;
+  const exs=D.exemptions||[];const seniorTotal=exs.filter(e=>e.senior).reduce((s,e)=>s+e.amount,0);
+  let scA,scB;if(sellerType===\'entity\'){scA=bAfterEx;scB=bBeforeEx;}else{scA=bAfterEx;scB=bAfterEx+seniorTotal;}
+  const basis=scB;
+  el(\'sc-a\').textContent=fmt(scA);el(\'sc-b\').textContent=fmt(scB);
+  if(sellerType===\'entity\'){el(\'sc-a-note\').textContent=\'Bill as issued (with exemptions — entity should not have them)\';el(\'sc-b-note\').textContent=\'Pre-exemption amount — basis for entity seller\';}else{el(\'sc-a-note\').textContent=\'Full year bill as issued by County\';el(\'sc-b-note\').textContent=seniorTotal>0?\'Scenario A + \'+fmt(seniorTotal)+\' senior exemption(s) added back\':\'No senior exemptions to add back — same as Scenario A\';}
+  const escrow=scB-scA;if(escrow>0.01){el(\'escrow-banner\').style.display=\'flex\';el(\'escrow-val\').textContent=fmt(escrow);}else{el(\'escrow-banner\').style.display=\'none\';}
+  el(\'basis-note\').textContent=\'Proration uses \'+(sellerType===\'entity\'?\'Scenario B (pre-exemption amount, entity seller)\':seniorTotal>0?\'Scenario B (senior exemption(s) added back)\':\'Scenario A (no senior exemptions to adjust)\');
+  if(D.fetched){const exsCopy=(D.exemptions||[]).map(e=>({...e,addBack:(sellerType===\'entity\'&&e.amount>0)||(sellerType===\'individual\'&&e.senior&&e.amount>0)}));buildExemptions({...D,exemptions:exsCopy});}
+  const closingStr=el(\'f-close\').value;
+  if(!closingStr||basis<=0){el(\'sum-ph\').style.display=\'block\';el(\'sum-body\').style.display=\'none\';el(\'detail-card\').style.display=\'none\';el(\'county-card\').style.display=\'none\';return;}
+  const parts=closingStr.split(\'-\');const closingDate=new Date(+parts[0],+parts[1]-1,+parts[2],12,0,0);const cy=closingDate.getFullYear();const basisYear=D.basisYear||2024;
+  let sellerLast=new Date(closingDate);if(closeOwner===\'buyer\')sellerLast=new Date(+parts[0],+parts[1]-1,+parts[2]-1,12,0,0);
+  const jan1=new Date(cy,0,1,12,0,0);const sellerDays=Math.round((sellerLast-jan1)/86400000)+1;
+  const yrDays=dayMode===\'actual\'?(isLeap(basisYear)?366:365):365;const proRate=rateVal/100;const proratedAnnual=basis*proRate;const perDiem=proratedAnnual/yrDays;const cyProration=perDiem*sellerDays;
+  const taxYears=D.taxYears||[];const countyItems=[];
+  taxYears.forEach(yr=>{[[yr.inst1,0],[yr.inst2,1]].forEach(([inst,idx])=>{if(inst&&!inst.paid&&inst.billed!==false){const key=yr.year+\'-\'+idx;const interest=interestOverrides[key]!==undefined?interestOverrides[key]:(inst.interest||0);countyItems.push({key,label:`Tax Year ${yr.year} · ${idx===0?\'1st\':\'2nd\'} Installment`,tax:inst.tax,interest,total:inst.tax+interest,due:inst.due,billUrl:inst.billUrl});}});});
+  const creditItems=[];const yr25=taxYears.find(y=>y.year===basisYear+1)||null;const inst25_1=yr25&&yr25.inst1?yr25.inst1:null;const inst25_2=yr25&&yr25.inst2?yr25.inst2:null;
+  if(!inst25_2){let credit25_2;if(inst25_1&&inst25_1.billed!==false){credit25_2=proratedAnnual-inst25_1.tax;}else{credit25_2=proratedAnnual;}if(credit25_2>0){const lbl=inst25_1&&inst25_1.billed!==false?`Tax Year ${basisYear+1} · 2nd Installment (est., unbilled)`:`Tax Year ${basisYear+1} · Full Year (est., unbilled)`;const sub=inst25_1&&inst25_1.billed!==false?`${fmt(proratedAnnual)} prorated annual − ${fmt(inst25_1.tax)} billed 1st install = est. 2nd`:`½ prorated annual (${fmt(basis)} × ${rateVal}% ÷ 2) — no ${basisYear+1} installments billed yet`;creditItems.push({label:lbl,sub,amount:credit25_2,dest:\'→ Credit to Buyer\'});}}
+  creditItems.push({label:`Tax Year ${cy} · Proration (Jan 1–${dStr(sellerLast)})`,sub:`${sellerDays} days × ${fmt(perDiem)}/day · basis: ${basisYear} full year ${fmt(basis)} × ${rateVal}%`,amount:cyProration,dest:\'→ Credit to Buyer\'});
+  if(countyItems.length){el(\'county-card\').style.display=\'block\';let html=\'\';countyItems.forEach(c=>{const link=c.billUrl?` <a href="${c.billUrl}" target="_blank" style="font-size:.72rem;color:var(--blue)">View Bill →</a>`:\'\';html+=`<div class="g3" style="margin-bottom:.875rem"><div class="f"><label>${c.label} Tax</label><input type="number" value="${c.tax.toFixed(2)}" readonly/></div><div class="f"><label>Interest (as of closing)</label><input type="number" step=".01" value="${c.interest.toFixed(2)}" id="int-${c.key}" oninput="updateInterest(\'${c.key}\',this)"/></div><div class="f"><label>Total Due${link}</label><input type="number" value="${c.total.toFixed(2)}" readonly id="tot-${c.key}"/></div></div>`;});el(\'county-rows\').innerHTML=html;}else{el(\'county-card\').style.display=\'none\';}
+  el(\'sum-ph\').style.display=\'none\';el(\'sum-body\').style.display=\'block\';el(\'detail-card\').style.display=\'block\';
+  let countyHTML=\'\';let countyTotal=0;if(countyItems.length){countyItems.forEach(c=>{countyTotal+=c.total;countyHTML+=`<div class="si2 county"><div class="sil"><h4>${c.label}</h4><p>Tax ${fmt(c.tax)} + Interest ${fmt(c.interest)} · Due ${c.due}</p></div><div class="sia"><span class="sd red">${fmt(c.total)}</span><span class="sdt">→ Cook County Treasurer</span></div></div>`;});}else{countyHTML=\'<div class="si2 county"><div class="sil"><h4>No unpaid billed installments on file</h4><p>Confirm with County Treasurer at closing</p></div></div>\';}
+  el(\'sum-county-rows\').innerHTML=countyHTML;
+  let creditHTML=\'\';let buyerTotal=0;creditItems.forEach(c=>{buyerTotal+=c.amount;creditHTML+=`<div class="si2 credit"><div class="sil"><h4>${c.label}</h4><p>${c.sub}</p></div><div class="sia"><span class="sd purple">${fmt(c.amount)}</span><span class="sdt">${c.dest}</span></div></div>`;});
+  el(\'sum-credit-rows\').innerHTML=creditHTML;
+  const est25_2=inst25_1&&inst25_1.billed!==false?proratedAnnual-inst25_1.tax:proratedAnnual;
+  el(\'d-byr\').textContent=basisYear;el(\'d-bill\').textContent=fmt(basis);el(\'d-rate\').textContent=rateVal+\'%\';el(\'d-annual\').textContent=fmt(proratedAnnual);el(\'d-days\').textContent=yrDays;el(\'d-diem\').textContent=fmt(perDiem)+\'/day\';
+  el(\'d-sdays-lbl\').textContent=`${cy} Seller Days (Jan 1–Closing)`;el(\'d-sdays\').textContent=`${sellerDays} days (Jan 1–${dStr(sellerLast)})`;el(\'d-pyr-lbl\').textContent=`${cy} Proration Credit`;el(\'d-pcredit\').textContent=fmt(cyProration);
+  el(\'d-est25-lbl\').textContent=`${basisYear+1} 2nd Inst. (Est., Unbilled)`;el(\'d-est25\').textContent=fmt(est25_2);
+  el(\'d-formula\').textContent=`${basisYear+1} 2nd (est.): ${fmt(basis)} × ${rateVal}% ${inst25_1&&inst25_1.billed!==false?\'− \'+fmt(inst25_1.tax)+\' (billed 1st)\':\' ÷ 2\'} = ${fmt(est25_2)}\\
+${cy} Proration:   ${fmt(basis)} × ${rateVal}% ÷ ${yrDays} × ${sellerDays} days = ${fmt(cyProration)}`;
+  el(\'d-sumbar\').innerHTML=`<strong>Closing:</strong> ${dStr(closingDate)}, ${cy} · <strong>Closing day:</strong> ${closeOwner} · <strong>Seller days in ${cy}:</strong> ${sellerDays} · <strong>Proration basis:</strong> ${basisYear} full year ${fmt(basis)} (${sellerType===\'entity\'?\'entity — pre-exemption\':seniorTotal>0?\'senior exemption added back\':\'individual — billed amount\'}) · <strong>Rate:</strong> ${rateVal}% · <strong>Daily:</strong> ${fmt(perDiem)}`;
+  el(\'t-county\').textContent=countyTotal>0?fmt(countyTotal):\'$0.00\';el(\'t-buyer\').textContent=fmt(buyerTotal)+(D.soldTax&&D.soldTax.exists?\' ⚠ Sold tax redemption not included\':\'\');
+}
+function copyLink(){const url=window.location.href;const btn=el(\'link-btn-txt\');const doFallback=()=>{try{window.prompt(\'Copy this link:\',url)}catch(e){}};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(()=>{btn.textContent=\'Copied!\';el(\'link-btn\').style.background=\'#dcfce7\';el(\'link-btn\').style.borderColor=\'#86efac\';setTimeout(()=>{btn.textContent=\'Copy Link\';el(\'link-btn\').style.background=\'\';el(\'link-btn\').style.borderColor=\'\';},2000);}).catch(doFallback);}else{doFallback();}}
+if(document.readyState===\'loading\'){document.addEventListener(\'DOMContentLoaded\',populate);}else{populate();}
+</script>

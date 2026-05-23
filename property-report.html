@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cook County Property Report — Deranian Law</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a1a;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .top-bar {
+    background: #1a3a5c;
+    color: white;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .top-bar .firm { font-size: 15px; font-weight: 700; }
+  .top-bar .sep { opacity: 0.4; }
+  .top-bar .tool { font-size: 14px; opacity: 0.85; }
+
+  /* ── Search panel ── */
+  .search-panel {
+    background: white;
+    border-bottom: 1px solid #dde3ea;
+    padding: 20px 24px;
+  }
+  .search-panel h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 14px;
+  }
+  .search-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+  .field-group label { font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field-group input {
+    border: 1.5px solid #c8d3de;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    background: #fafcfe;
+  }
+  .field-group input:focus { border-color: #1a3a5c; background: white; }
+  .pin-input { width: 200px; font-family: monospace; letter-spacing: 0.08em; }
+  .addr-input { width: 320px; }
+  .btn {
+    padding: 9px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #1a3a5c; color: white; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary { background: #e8eef4; color: #1a3a5c; }
+  .btn-secondary:hover { background: #dce4ee; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  /* ── Quick links bar ── */
+  .quick-links {
+    background: #e8f0f8;
+    border-bottom: 1px solid #c8d8e8;
+    padding: 10px 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .quick-links span { font-size: 11px; font-weight: 700; color: #1a3a5c; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 4px; }
+  .quick-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+  .quick-link:hover { opacity: 0.8; }
+  .ql-teal  { background: #d1ecf1; color: #0c5460; }
+  .ql-blue  { background: #cce5ff; color: #004085; }
+  .ql-green { background: #d4edda; color: #155724; }
+  .ql-orange{ background: #fde8ce; color: #7c4700; }
+  .ql-purple{ background: #e2d9f3; color: #4a2780; }
+
+  /* ── Main area ── */
+  .main { padding: 20px 24px; max-width: 1200px; }
+
+  /* State panels */
+  .state-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    color: #888;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+  }
+  .state-panel .icon { font-size: 36px; margin-bottom: 12px; }
+  .state-panel h2 { font-size: 16px; color: #444; margin-bottom: 8px; }
+  .state-panel p { font-size: 13px; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+
+  /* ── Result layout ── */
+  .result-header {
+    background: #1a3a5c;
+    color: white;
+    padding: 18px 22px;
+    border-radius: 10px 10px 0 0;
+  }
+  .result-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+  .result-header .meta { font-size: 12px; opacity: 0.75; }
+  .result-header .pin-disp { font-size: 11px; opacity: 0.6; font-family: monospace; margin-top: 4px; }
+  .result-body { background: #f0f4f8; padding: 16px 0 0 0; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 0 14px 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 0 0 14px 0; }
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .card.full { grid-column: 1 / -1; }
+  .card h3 {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1a3a5c;
+    margin-bottom: 10px;
+    padding-bottom: 7px;
+    border-bottom: 2px solid #e8eef4;
+  }
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .kv-label { color: #666; font-size: 12px; flex-shrink: 0; }
+  .kv-val { font-weight: 600; font-size: 12.5px; text-align: right; word-break: break-word; }
+  .kv-val.mono { font-family: monospace; font-size: 11.5px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead th {
+    background: #f0f4f8;
+    padding: 7px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #555;
+  }
+  tbody td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafbfc; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-green  { background: #d4edda; color: #155724; }
+  .badge-yellow { background: #fff3cd; color: #856404; }
+  .badge-red    { background: #f8d7da; color: #721c24; }
+  .badge-blue   { background: #d1ecf1; color: #0c5460; }
+  .badge-gray   { background: #e9ecef; color: #495057; }
+
+  .alert {
+    background: #fff8e1;
+    border-left: 4px solid #f59e0b;
+    padding: 9px 13px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: #7c4700;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .alert-red {
+    background: #fff0f0;
+    border-left: 4px solid #dc3545;
+    padding: 9px 13px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: #721c24;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .na { color: #aaa; font-style: italic; font-weight: 400; }
+
+  /* Source links row inside result */
+  .source-links {
+    background: white;
+    border-top: 1px solid #e0e8f0;
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .source-links span { font-size: 11px; color: #666; font-weight: 600; }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #c8d8e8;
+    border-top-color: #1a3a5c;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-msg { color: #555; font-size: 13px; }
+
+  .error-box {
+    background: #fff5f5;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 16px 20px;
+    color: #7f1d1d;
+    font-size: 13px;
+  }
+
+  /* Footer */
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: #aaa;
+    padding: 20px 24px;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .addr-input { width: 100%; }
+    .main { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="firm">Deranian Law</span>
+  <span class="sep">|</span>
+  <span class="tool">Cook County Property Report</span>
+</div>
+
+<!-- Search Panel -->
+<div class="search-panel">
+  <h1>Property Lookup</h1>
+  <div class="search-row">
+    <div class="field-group">
+      <label>PIN (14 digits)</label>
+      <input id="pinInput" class="pin-input" type="text" placeholder="e.g. 29-10-429-038-0000"
+             maxlength="19" autocomplete="off" spellcheck="false"
+             oninput="formatPin(this)" onkeydown="handleEnter(event)">
+    </div>
+    <div class="field-group">
+      <label>— or — Street Address</label>
+      <input id="addrInput" class="addr-input" type="text" placeholder="e.g. 689 E Sibley Blvd Dolton IL"
+             autocomplete="off" onkeydown="handleEnter(event)">
+    </div>
+    <button class="btn btn-primary" onclick="runLookup()">Run Report</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+  </div>
+  <div id="pinHint" style="font-size:11px;color:#888;margin-top:8px;display:none;">
+    Enter the 14-digit PIN from the Cook County Assessor or prior tax bill. Dashes optional.
+  </div>
+</div>
+
+<!-- Quick Links -->
+<div class="quick-links" id="quickLinksBar">
+  <span>Open in:</span>
+  <a id="ql-portal" class="quick-link ql-teal" href="https://www.cookcountypropertyinfo.com/" target="_blank">🏠 Tax Portal</a>
+  <a id="ql-crs"    class="quick-link ql-blue" href="https://crs.cookcountyclerkil.gov/Search" target="_blank">📄 Clerk Recording System</a>
+  <a id="ql-assessor" class="quick-link ql-green" href="https://www.cookcountyassessor.com/" target="_blank">📊 Assessor</a>
+  <a id="ql-treasurer" class="quick-link ql-orange" href="https://cookcountytreasurer.com/requestaduplicatetaxbillsearch.aspx" target="_blank">💳 Treasurer</a>
+  <a id="ql-bor" class="quick-link ql-purple" href="https://appeals.cookcountyboardofreview.com/" target="_blank">⚖️ Board of Review</a>
+</div>
+
+<!-- Main content area -->
+<div class="main" id="mainArea">
+  <div class="state-panel" id="blankState">
+    <div class="icon">🏘️</div>
+    <h2>Enter a PIN or Address Above</h2>
+    <p>Type a 14-digit Cook County PIN or a street address, then click <strong>Run Report</strong>.
+       Property data is pulled from Cook County open records and public data sources.</p>
+  </div>
+</div>
+
+<div class="page-footer" id="pageFooter">
+  Cook County Property Report · Deranian Law · Data from Cook County Assessor open data &amp; public records
+</div>
+
+<script>
+// ── PIN formatting ──────────────────────────────────────────────────
+function formatPin(el) {
+  let raw = el.value.replace(/[^0-9]/g, '').slice(0, 14);
+  let fmt = '';
+  if (raw.length <= 2) fmt = raw;
+  else if (raw.length <= 4) fmt = raw.slice(0,2) + '-' + raw.slice(2);
+  else if (raw.length <= 7) fmt = raw.slice(0,2) + '-' + raw.slice(2,4) + '-' + raw.slice(4);
+  else if (raw.length <= 10) fmt = raw.slice(0,2) + '-' + raw.slice(2,4) + '-' + raw.slice(4,7) + '-' + raw.slice(7);
+  else fmt = raw.slice(0,2) + '-' + raw.slice(2,4) + '-' + raw.slice(4,7) + '-' + raw.slice(7,10) + '-' + raw.slice(10);
+  el.value = fmt;
+  document.getElementById('pinHint').style.display = raw.length > 0 && raw.length < 14 ? 'block' : 'none';
+}
+
+function rawPin(val) {
+  return val.replace(/[^0-9]/g, '');
+}
+
+function dashedPin(pin14) {
+  // 29-10-429-038-0000  (2-2-3-3-4)
+  return pin14.slice(0,2) + '-' + pin14.slice(2,4) + '-' + pin14.slice(4,7) + '-' + pin14.slice(7,10) + '-' + pin14.slice(10);
+}
+
+function handleEnter(e) {
+  if (e.key === 'Enter') runLookup();
+}
+
+// ── Quick links update ──────────────────────────────────────────────
+function updateQuickLinks(pin14) {
+  const dashed = dashedPin(pin14);
+  // Tax portal — just needs PIN in search box, can't pre-fill via URL, so open homepage
+  // CRS — can sometimes be passed as a query (their form uses POST so we open homepage)
+  // Assessor — has a search URL
+  document.getElementById('ql-assessor').href =
+    `https://www.cookcountyassessor.com/property-details?pin=${pin14}`;
+  // Treasurer search
+  document.getElementById('ql-treasurer').href =
+    `https://cookcountytreasurer.com/requestaduplicatetaxbillsearch.aspx`;
+}
+
+// ── Main lookup ─────────────────────────────────────────────────────
+async function runLookup() {
+  const pinRaw = rawPin(document.getElementById('pinInput').value);
+  const addr   = document.getElementById('addrInput').value.trim();
+
+  if (!pinRaw && !addr) {
+    alert('Please enter a PIN or address.');
+    return;
+  }
+  if (pinRaw && pinRaw.length !== 14) {
+    alert('PIN must be exactly 14 digits (e.g. 29104290380000 or 29-10-429-038-0000).');
+    return;
+  }
+
+  document.getElementById('blankState').style.display = 'none';
+  showLoading();
+
+  try {
+    if (pinRaw) {
+      updateQuickLinks(pinRaw);
+      await lookupByPin(pinRaw);
+    } else {
+      await lookupByAddress(addr);
+    }
+  } catch(err) {
+    showError('Lookup failed: ' + err.message);
+  }
+}
+
+function showLoading() {
+  const main = document.getElementById('mainArea');
+  main.innerHTML = `
+    <div class="state-panel">
+      <span class="spinner"></span>
+      <span class="loading-msg">Fetching property data from Cook County open records…</span>
+    </div>`;
+}
+
+function showError(msg) {
+  const main = document.getElementById('mainArea');
+  main.innerHTML = `<div class="error-box">⚠️ ${escHtml(msg)}</div>`;
+}
+
+function clearAll() {
+  document.getElementById('pinInput').value = '';
+  document.getElementById('addrInput').value = '';
+  document.getElementById('pinHint').style.display = 'none';
+  const main = document.getElementById('mainArea');
+  main.innerHTML = `<div class="state-panel" id="blankState">
+    <div class="icon">🏘️</div>
+    <h2>Enter a PIN or Address Above</h2>
+    <p>Type a 14-digit Cook County PIN or a street address, then click <strong>Run Report</strong>.
+       Property data is pulled from Cook County open records and public data sources.</p>
+  </div>`;
+  // reset quick links
+  document.getElementById('ql-assessor').href = 'https://www.cookcountyassessor.com/';
+  document.getElementById('ql-treasurer').href = 'https://cookcountytreasurer.com/requestaduplicatetaxbillsearch.aspx';
+}
+
+// ── Socrata API fetchers ────────────────────────────────────────────
+const SOCRATA_BASE = 'https://datacatalog.cookcountyil.gov/resource';
+
+async function socrataFetch(dataset, query) {
+  const url = `${SOCRATA_BASE}/${dataset}.json?${query}&$limit=50`;
+  const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!resp.ok) throw new Error(`API error ${resp.status}`);
+  return resp.json();
+}
+
+// Assessor parcel universe (address, township, class, values)
+async function fetchParcelInfo(pin14) {
+  // Multiple Socrata datasets for Cook County Assessor
+  try {
+    const rows = await socrataFetch('uzyt-m557', `$where=pin14='${pin14}'`);
+    if (rows && rows.length > 0) return rows[0];
+  } catch(e) {}
+
+  try {
+    // Alternative: parcel addresses dataset
+    const rows = await socrataFetch('c49d-89sn', `pin14=${pin14}`);
+    if (rows && rows.length > 0) return rows[0];
+  } catch(e) {}
+
+  return null;
+}
+
+// Assessor single-family characteristics
+async function fetchSFChars(pin14) {
+  try {
+    const rows = await socrataFetch('bcnq-qi2z', `$where=pin14='${pin14}'`);
+    if (rows && rows.length > 0) return rows[0];
+  } catch(e) {}
+  return null;
+}
+
+// Appeal results
+async function fetchAppeals(pin14) {
+  try {
+    const rows = await socrataFetch('7pny-nedm', `$where=pin='${pin14}'&$order=tax_year DESC`);
+    return rows || [];
+  } catch(e) {}
+  return [];
+}
+
+// Sales history
+async function fetchSales(pin14) {
+  try {
+    const rows = await socrataFetch('5pge-nu6u', `$where=pin='${pin14}'&$order=sale_date DESC&$limit=10`);
+    return rows || [];
+  } catch(e) {}
+  return [];
+}
+
+// Parcel value history (AV over years)
+async function fetchValueHistory(pin14) {
+  try {
+    const rows = await socrataFetch('uzyt-m557', `$where=pin14='${pin14}'&$order=tax_year DESC&$limit=10`);
+    return rows || [];
+  } catch(e) {}
+  return [];
+}
+
+// Address lookup → PIN
+async function lookupByAddress(addr) {
+  // Try Socrata address search
+  const enc = encodeURIComponent(addr.toUpperCase());
+  try {
+    const rows = await socrataFetch('c49d-89sn', `$where=upper(property_address) like '%25${enc}%25'&$limit=10`);
+    if (rows && rows.length > 0) {
+      const pin14 = rows[0].pin14;
+      if (pin14) {
+        document.getElementById('pinInput').value = dashedPin(pin14);
+        formatPin(document.getElementById('pinInput'));
+        updateQuickLinks(pin14);
+        await lookupByPin(pin14);
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Fallback: try another dataset field name
+  try {
+    const enc2 = encodeURIComponent(addr.toUpperCase().split(' ').slice(0,2).join(' '));
+    const rows = await socrataFetch('uzyt-m557', `$where=upper(property_address) like '%25${enc2}%25'&$limit=5`);
+    if (rows && rows.length > 0) {
+      const pin14 = rows[0].pin14 || rows[0].pin;
+      if (pin14) {
+        const p = rawPin(pin14);
+        document.getElementById('pinInput').value = dashedPin(p);
+        formatPin(document.getElementById('pinInput'));
+        updateQuickLinks(p);
+        await lookupByPin(p);
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Could not find by address
+  showError(`Could not locate a PIN for "${addr}" in Cook County open records. ` +
+    `Try entering the 14-digit PIN directly, or look it up at cookcountypropertyinfo.com.`);
+}
+
+// ── Primary lookup by PIN ───────────────────────────────────────────
+async function lookupByPin(pin14) {
+  const [parcel, sfChars, appeals, sales, valueHist] = await Promise.allSettled([
+    fetchParcelInfo(pin14),
+    fetchSFChars(pin14),
+    fetchAppeals(pin14),
+    fetchSales(pin14),
+    fetchValueHistory(pin14),
+  ]);
+
+  const p    = parcel.value    || null;
+  const sf   = sfChars.value   || null;
+  const apls = appeals.value   || [];
+  const sls  = sales.value     || [];
+  const vh   = valueHist.value || [];
+
+  renderReport(pin14, p, sf, apls, sls, vh);
+}
+
+// ── Render ──────────────────────────────────────────────────────────
+function renderReport(pin14, p, sf, apls, sls, vh) {
+  const dashed = dashedPin(pin14);
+  const noData = !p && !sf && apls.length === 0 && sls.length === 0;
+
+  // Extract fields with fallbacks
+  const addr    = fld(p, 'property_address','addr','address') || '—';
+  const city    = fld(p, 'municipality','city','township') || '—';
+  const township = fld(p, 'township_name','township') || '—';
+  const taxCode = fld(p, 'tax_code','tax_code_number') || '—';
+  const propCls = fld(p, 'class','property_class','major_class') || '—';
+  const mktVal  = fmtDollar(fld(p,'estimated_market_value','market_value','emv'));
+  const av      = fmtDollar(fld(p,'assessed_value','total_assessed_value','av'));
+  const taxYear = fld(p,'tax_year','year') || '—';
+  const taxRate = fld(p,'composite_tax_rate','tax_rate') || '—';
+  const lotSize = fld(sf,'land_size','lot_size') || fld(p,'land_size','lot_sqft') || '—';
+  const bldgSize= fld(sf,'building_sqft','bldg_sq_ft','total_building_sqft') || '—';
+
+  // Check if we have any data at all
+  const hasApiData = !!(p || sf);
+
+  const html = `
+  <div style="background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,0.1);margin-bottom:20px;">
+    <div class="result-header">
+      <h2>${addr !== '—' ? escHtml(addr) : 'PIN ' + dashed}</h2>
+      <div class="meta">${escHtml(city)} &nbsp;·&nbsp; Township: ${escHtml(township)} &nbsp;·&nbsp; Tax Code: ${escHtml(taxCode)}</div>
+      <div class="pin-disp">PIN: ${dashed}</div>
+    </div>
+    <div class="result-body" style="padding:14px;">
+
+      ${noData ? `
+      <div class="alert" style="margin-bottom:14px;">
+        ℹ️ No data returned from Cook County open data APIs for this PIN.
+        The property may be commercial, exempt, or not yet indexed.
+        Use the <strong>Open in</strong> buttons above to look it up directly on the county websites.
+      </div>` : ''}
+
+      ${hasApiData ? `
+      <!-- Row 1: Property Details + Class Info -->
+      <div class="grid2" style="margin-bottom:14px;">
+        <div class="card">
+          <h3>Property Details</h3>
+          <div class="kv">
+            <div class="kv-row"><span class="kv-label">PIN</span><span class="kv-val mono">${dashed}</span></div>
+            <div class="kv-row"><span class="kv-label">Address</span><span class="kv-val">${escHtml(addr)}</span></div>
+            <div class="kv-row"><span class="kv-label">Municipality</span><span class="kv-val">${escHtml(city)}</span></div>
+            <div class="kv-row"><span class="kv-label">Township</span><span class="kv-val">${escHtml(township)}</span></div>
+            <div class="kv-row"><span class="kv-label">Tax Code</span><span class="kv-val mono">${escHtml(taxCode)}</span></div>
+            <div class="kv-row"><span class="kv-label">Tax Year (data)</span><span class="kv-val">${escHtml(taxYear)}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Assessed Values &amp; Class</h3>
+          <div class="kv">
+            <div class="kv-row"><span class="kv-label">Property Class</span><span class="kv-val">${escHtml(propCls)}</span></div>
+            <div class="kv-row"><span class="kv-label">Est. Market Value</span><span class="kv-val">${mktVal !== '—' ? mktVal : '<span class=na>Not available</span>'}</span></div>
+            <div class="kv-row"><span class="kv-label">Assessed Value</span><span class="kv-val">${av !== '—' ? av : '<span class=na>Not available</span>'}</span></div>
+            <div class="kv-row"><span class="kv-label">Composite Tax Rate</span><span class="kv-val">${taxRate !== '—' ? escHtml(taxRate) : '<span class=na>Not available</span>'}</span></div>
+            <div class="kv-row"><span class="kv-label">Lot Size</span><span class="kv-val">${lotSize !== '—' ? escHtml(lotSize)+' sq ft' : '<span class=na>Not available</span>'}</span></div>
+            <div class="kv-row"><span class="kv-label">Building Size</span><span class="kv-val">${bldgSize !== '—' ? escHtml(bldgSize)+' sq ft' : '<span class=na>Not available</span>'}</span></div>
+          </div>
+        </div>
+      </div>` : ''}
+
+      ${renderValueHistory(vh)}
+      ${renderAppeals(apls)}
+      ${renderSales(sls)}
+
+      <!-- Source links -->
+      <div class="source-links">
+        <span>Verify &amp; get full detail:</span>
+        <a class="quick-link ql-teal" href="https://www.cookcountypropertyinfo.com/" target="_blank">🏠 Tax Portal</a>
+        <a class="quick-link ql-blue" href="https://crs.cookcountyclerkil.gov/Search" target="_blank">📄 Deeds &amp; Documents</a>
+        <a class="quick-link ql-green" href="https://www.cookcountyassessor.com/property-details?pin=${pin14}" target="_blank">📊 Assessor Detail</a>
+        <a class="quick-link ql-orange" href="https://cookcountytreasurer.com/requestaduplicatetaxbillsearch.aspx" target="_blank">💳 Tax Bills</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card full" style="margin-bottom:16px;background:white;border-radius:8px;padding:16px;">
+    <h3>⚖️ Attorney Notes</h3>
+    ${buildAttorneyNotes(pin14, p, sf, apls, sls, vh)}
+  </div>`;
+
+  const main = document.getElementById('mainArea');
+  main.innerHTML = html;
+}
+
+// ── Section renderers ───────────────────────────────────────────────
+function renderValueHistory(vh) {
+  if (!vh || vh.length === 0) return '';
+  const rows = vh.slice(0, 7).map(r => {
+    const yr  = fld(r,'tax_year','year') || '—';
+    const mv  = fmtDollar(fld(r,'estimated_market_value','market_value','emv'));
+    const av  = fmtDollar(fld(r,'assessed_value','total_assessed_value','av'));
+    return `<tr><td>${escHtml(yr)}</td><td>${mv !== '—' ? mv : '<span class=na>—</span>'}</td><td>${av !== '—' ? av : '<span class=na>—</span>'}</td></tr>`;
+  }).join('');
+  return `
+  <div class="card full" style="margin-bottom:14px;">
+    <h3>Assessment Value History</h3>
+    <table>
+      <thead><tr><th>Tax Year</th><th>Est. Market Value</th><th>Assessed Value</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderAppeals(apls) {
+  if (!apls || apls.length === 0) return `
+  <div class="card full" style="margin-bottom:14px;">
+    <h3>Assessment Appeals</h3>
+    <p style="color:#888;font-size:13px;padding:6px 0;">No appeal records found in open data. Check the Assessor site for complete appeal history.</p>
+  </div>`;
+
+  const rows = apls.slice(0, 8).map(r => {
+    const yr  = fld(r,'tax_year','year') || '—';
+    const body = fld(r,'appeal_type','filed_with') || '—';
+    const result = fld(r,'result','outcome','decision') || '—';
+    const badge = result.toLowerCase().includes('reduc') ? 'badge-green'
+                : result.toLowerCase().includes('deni')  ? 'badge-red'
+                : 'badge-blue';
+    return `<tr><td>${escHtml(yr)}</td><td>${escHtml(body)}</td><td><span class="badge ${badge}">${escHtml(result)}</span></td></tr>`;
+  }).join('');
+
+  return `
+  <div class="card full" style="margin-bottom:14px;">
+    <h3>Assessment Appeals</h3>
+    <table>
+      <thead><tr><th>Tax Year</th><th>Body</th><th>Result</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderSales(sls) {
+  if (!sls || sls.length === 0) return `
+  <div class="card full" style="margin-bottom:14px;">
+    <h3>Recent Sales</h3>
+    <p style="color:#888;font-size:13px;padding:6px 0;">No recent sale records found in open data. Check the Clerk Recording System for deed history.</p>
+  </div>`;
+
+  const rows = sls.slice(0, 8).map(r => {
+    const dt   = fmtDate(fld(r,'sale_date','date'));
+    const price = fmtDollar(fld(r,'sale_price','price','amount'));
+    const type  = fld(r,'deed_type','sale_type','instrument_type') || '—';
+    const buyer = fld(r,'buyer_name','grantee','buyer') || '—';
+    const seller = fld(r,'seller_name','grantor','seller') || '—';
+    return `<tr>
+      <td>${dt}</td>
+      <td>${price !== '—' ? price : '<span class=na>—</span>'}</td>
+      <td>${escHtml(type)}</td>
+      <td>${escHtml(buyer)}</td>
+      <td>${escHtml(seller)}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="card full" style="margin-bottom:14px;">
+    <h3>Recent Sales / Transfers</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Price</th><th>Instrument Type</th><th>Buyer / Grantee</th><th>Seller / Grantor</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function buildAttorneyNotes(pin14, p, sf, apls, sls, vh) {
+  const notes = [];
+
+  // Check for appeals with reductions
+  if (apls && apls.length > 0) {
+    const reductions = apls.filter(a => (fld(a,'result','outcome','decision')||'').toLowerCase().includes('reduc'));
+    if (reductions.length > 0) {
+      notes.push({ cls: 'alert', text: `This property has ${reductions.length} prior assessment reduction(s) on record. Verify current assessed value and whether exemptions are properly applied.` });
+    }
+  }
+
+  // Check for recent sales at possibly non-arm's-length prices
+  if (sls && sls.length > 0) {
+    const recent = sls.filter(s => {
+      const price = parseFloat(fld(s,'sale_price','price','amount') || '0');
+      return price > 0 && price < 10000;
+    });
+    if (recent.length > 0) {
+      notes.push({ cls: 'alert', text: `One or more recorded sales show a price under $10,000. This may indicate an inter-family transfer, trust conveyance, or nominal deed. Review deed type and confirm arm's-length transaction status.` });
+    }
+  }
+
+  // Missing data note
+  notes.push({ cls: '', text: `<strong>Data source note:</strong> Property details above come from Cook County Assessor open data (tax/assessment records). For current tax payment status, liens, and full recorded document chain, open the <strong>Tax Portal</strong> and <strong>Clerk Recording System</strong> using the buttons above.` });
+
+  // Tax portal PIN note
+  notes.push({ cls: '', text: `<strong>Full lookup on Tax Portal:</strong> Go to <a href="https://www.cookcountypropertyinfo.com/" target="_blank">cookcountypropertyinfo.com</a> and enter PIN <code style="background:#f0f4f8;padding:1px 5px;border-radius:3px;font-size:12px;">${dashedPin(pin14)}</code> to see tax payment history, exemptions, delinquency status, and recorded documents in one place.` });
+
+  // CRS link note
+  notes.push({ cls: '', text: `<strong>Deed &amp; lien chain:</strong> Go to <a href="https://crs.cookcountyclerkil.gov/Search" target="_blank">crs.cookcountyclerkil.gov/Search</a> and enter PIN ${dashedPin(pin14)} to retrieve all recorded deeds, mortgages, releases, liens, and installment contract memoranda. Look for unreleased mortgages, land trust structures, or installment contracts.` });
+
+  if (notes.length === 0) {
+    return '<p style="color:#888;font-size:13px;padding:6px 0;">No flags generated — review data above manually.</p>';
+  }
+
+  return notes.map((n, i) => {
+    if (n.cls) {
+      return `<div class="${n.cls}" style="margin-top:${i>0?'10px':'0'}">${n.text}</div>`;
+    }
+    return `<div style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;font-size:13px;color:#333;line-height:1.6;">
+      <div style="background:#1a3a5c;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;">${i+1}</div>
+      <div>${n.text}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Utilities ───────────────────────────────────────────────────────
+function fld(obj) {
+  if (!obj) return null;
+  for (let i = 1; i < arguments.length; i++) {
+    const v = obj[arguments[i]];
+    if (v !== undefined && v !== null && v !== '') return v;
+  }
+  return null;
+}
+
+function escHtml(s) {
+  if (s == null) return '—';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDollar(val) {
+  if (!val) return '—';
+  const n = parseFloat(val);
+  if (isNaN(n)) return '—';
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function fmtDate(val) {
+  if (!val) return '—';
+  try {
+    const d = new Date(val);
+    if (isNaN(d)) return escHtml(val);
+    return d.toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'});
+  } catch(e) { return escHtml(val); }
+}
+</script>
+</body>
+</html>
